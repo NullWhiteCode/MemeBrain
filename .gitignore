@@ -1,0 +1,16 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+
+# VS Code
+.vscode/
+
+# Environment variables (future)
+.env
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
