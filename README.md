@@ -1,4 +1,4 @@
-# MemeBrain
+# MemeBrain :smirk_cat:
 A local-first AI image search engine for people with terrible file naming habits.
 
 - Local first.
@@ -10,7 +10,7 @@ A local-first AI image search engine for people with terrible file naming habits
 - No hidden background uploads.
 - Everything should be inspectable.
 
-## Planned Features
+## Planned Features :point_left:
 
 - Semantic image search
 - Offline indexing
