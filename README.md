@@ -18,3 +18,4 @@ A local-first AI image search engine for people with terrible file naming habits
 - Duplicate detection
 - OCR
 - Local AI support
+- and more...... (if I'm not too lazy)
