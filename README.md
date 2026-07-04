@@ -9,6 +9,7 @@ A local-first AI image search engine for people with terrible file naming habits
 - No telemetry.
 - No hidden background uploads.
 - Everything should be inspectable.
+- No content filtering. Yes... *those* folders work too. :expressionless:
 
 ## Planned Features :point_left:
 
