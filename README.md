@@ -9,3 +9,12 @@ A local-first AI image search engine for people with terrible file naming habits
 - No telemetry.
 - No hidden background uploads.
 - Everything should be inspectable.
+
+## Planned Features
+
+- Semantic image search
+- Offline indexing
+- Reverse image search
+- Duplicate detection
+- OCR
+- Local AI support
