@@ -1,7 +1,7 @@
 # MemeBrain :smirk_cat:
 A local-first AI image search engine for people with terrible file naming habits.
 
-<img width="1509" height="1185" alt="memebrain banner" src="https://github.com/user-attachments/assets/47f84b7c-f483-4703-8a98-f708dae9d654" />
+<img width="1509" height="800" alt="memebrain banner" src="https://github.com/user-attachments/assets/47f84b7c-f483-4703-8a98-f708dae9d654" />
 
 - Local first.
 - Offline by default.
