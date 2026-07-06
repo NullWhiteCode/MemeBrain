@@ -3,6 +3,15 @@ from pathlib import Path
 
 app = Flask(__name__)
 
+SUPPORTED_EXTENSIONS = {
+".png",
+".jpg",
+".jpeg",
+".gif",
+".webp",
+".bmp"
+}
+
 @app.route('/', methods=['GET', 'POST'])
 def home():
     folder_path = None
@@ -16,7 +25,8 @@ def home():
         if folder_path.is_dir():
             for child in folder_path.iterdir():
                 if child.is_file():
-                    files.append(child.name)
+                    if child.suffix.lower() in SUPPORTED_EXTENSIONS:
+                        files.append(child.name)
                 elif child.is_dir():
                     directories.append(child.name)
 
