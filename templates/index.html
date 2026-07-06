@@ -11,7 +11,8 @@
 <h2>Files</h2>
 <ul>
 {% for file in files %}
-    <li>{{ file }}</li>
+    <li><img src="{{ url_for('file', filename=file, folder_path=folder_path) }}" alt="{{ file }}" style="max-width: 200px;"></li>
+    <li><a href="{{ url_for('file', filename=file, folder_path=folder_path) }}">{{ file }}</a></li>
 {% endfor %}
 </ul>
 
@@ -21,3 +22,4 @@
     <li>{{ directory }}</li>
 {% endfor %}
 </ul>
+

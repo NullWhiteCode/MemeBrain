@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_from_directory
 from pathlib import Path
 
 app = Flask(__name__)
@@ -31,6 +31,17 @@ def home():
                     directories.append(child.name)
 
     return render_template('index.html', folder_path=folder_path, files=files, directories=directories)
+
+@app.route('/file/<path:filename>')
+def file(filename):
+    folder_path = request.args.get('folder_path')
+    folder_path = Path(folder_path)
+    file_path = folder_path / filename
+    if file_path.is_file() and file_path.suffix.lower() in SUPPORTED_EXTENSIONS:
+        return send_from_directory(folder_path, filename)
+    else:
+        return "File not found or unsupported file type.", 404
+    
 
 if __name__ == '__main__':
     app.run(debug=True)
