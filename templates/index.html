@@ -1,25 +1,64 @@
-<h1>MemeBrain</h1>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MemeBrain</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='CSS/style.css') }}"
+    />
+  </head>
+  <body>
+    <main class="container">
+      <h1>MemeBrain</h1>
 
-<p>Current folder: {{ folder_path }}</p>
+      <p>Current folder: {{ folder_path }}</p>
 
-<form method="POST">
-    <label for="folder_path">Folder path:</label>
-    <input type="text" id="folder_path" name="folder_path">
-    <button type="submit">Save folder</button>
-</form>
+      <form method="POST">
+        <label for="folder_path">Folder path:</label>
+        <input
+          type="text"
+          id="folder_path"
+          name="folder_path"
+          value="{{ folder_path or '' }}"
+        />
+        <button type="submit">Save folder</button>
+      </form>
 
-<h2>Files</h2>
-<ul>
-{% for file in files %}
-    <li><img src="{{ url_for('file', filename=file, folder_path=folder_path) }}" alt="{{ file }}" style="max-width: 200px;"></li>
-    <li><a href="{{ url_for('file', filename=file, folder_path=folder_path) }}">{{ file }}</a></li>
-{% endfor %}
-</ul>
+      <p>
+        {{ files|length }} images found. {{ directories|length }} directories
+        found.
+      </p>
 
-<h2>Directories</h2>
-<ul>
-{% for directory in directories %}
-    <li>{{ directory }}</li>
-{% endfor %}
-</ul>
+      <h2>Images</h2>
+      {% if files %}
+      <div class="image-grid">
+        {% for file in files %}
+        <figure class="image-card">
+          <a
+            href="{{ url_for('file', filename=file, folder_path=folder_path) }}"
+            target="_blank"
+          >
+            <img
+              src="{{ url_for('file', filename=file, folder_path=folder_path) }}"
+              alt="{{ file }}"
+            />
+          </a>
+          <figcaption>{{ file }}</figcaption>
+        </figure>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p>No images found in the selected folder.</p>
+      {% endif %}
 
+      <h2>Directories</h2>
+      <ul>
+        {% for directory in directories %}
+        <li>{{ directory }}</li>
+        {% endfor %}
+      </ul>
+    </main>
+  </body>
+</html>
