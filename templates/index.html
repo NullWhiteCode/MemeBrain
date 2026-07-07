@@ -38,11 +38,11 @@
         {% for file in files %}
         <figure class="image-card">
           <a
-            href="{{ url_for('file', filename=file, folder_path=folder_path) }}"
+            href="{{ url_for('serve_image', filename=file, folder_path=folder_path) }}"
             target="_blank"
           >
             <img
-              src="{{ url_for('file', filename=file, folder_path=folder_path) }}"
+              src="{{ url_for('serve_image', filename=file, folder_path=folder_path) }}"
               alt="{{ file }}"
             />
           </a>

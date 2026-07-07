@@ -14,6 +14,22 @@ SUPPORTED_EXTENSIONS = {
 ".bmp"
 }
 
+
+def get_folder_contents(folder_path):
+    folder_path = Path(folder_path)
+    files = []
+    directories = []
+
+    if folder_path.is_dir():
+        for child in sorted(folder_path.rglob('*')):
+            if child.is_file() and child.suffix.lower() in SUPPORTED_EXTENSIONS:
+                files.append(child.relative_to(folder_path).as_posix())
+            elif child.is_dir():
+                directories.append(child.relative_to(folder_path).as_posix())
+
+    return files, directories
+
+
 @app.route('/', methods=['GET', 'POST'])
 def home():
     folder_path = None
@@ -25,19 +41,12 @@ def home():
         folder_path = request.form.get('folder_path')
         # Convert the provided string to a Path for reliable filesystem operations
         folder_path = Path(folder_path)
-        if folder_path.is_dir():
-            for child in folder_path.iterdir():
-                if child.is_file():
-                    # Use lower() so extension match is case-insensitive
-                    if child.suffix.lower() in SUPPORTED_EXTENSIONS:
-                        files.append(child.name)
-                elif child.is_dir():
-                    directories.append(child.name)
+        files, directories = get_folder_contents(folder_path)
 
     return render_template('index.html', folder_path=folder_path, files=files, directories=directories)
 
 @app.route('/file/<path:filename>')
-def file(filename):
+def serve_image(filename):
     folder_path = request.args.get('folder_path')
     folder_path = Path(folder_path)
     file_path = folder_path / filename
