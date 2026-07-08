@@ -24,6 +24,14 @@
           value="{{ folder_path or '' }}"
         />
         <button type="submit">Save folder</button>
+        <label for="search_pattern">Search:</label>
+        <input
+          type="text"
+          id="search_pattern"
+          name="search_pattern"
+          value="{{ search_pattern or '' }}"
+        />
+        <button type="submit">Search</button>
       </form>
 
       <p>
@@ -32,7 +40,8 @@
       </p>
 
       <h2>Images</h2>
-      <!-- Only display image formats currently supported by MemeBrain -->
+
+      <!-- Image gallery -->
       {% if files %}
       <div class="image-grid">
         {% for file in files %}
@@ -54,6 +63,7 @@
       <p>No images found in the selected folder.</p>
       {% endif %}
 
+      <!-- Directory list -->
       <h2>Directories</h2>
       <ul>
         {% for directory in directories %}
