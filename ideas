@@ -1,45 +1,38 @@
-Ideas
-
-- Rewrite of readme (Project quickly becoming a local AI assisted media suite)
+## User Experience
 
 - Native folder picker
-
 - Full-screen image preview (lightbox)
-
-- Reverse image search
-
-- OCR
-
-- Duplicate grouping
-
-- AI editing
-
-- Plugin system
-
-- ComfyUI nodes
-
-- REST API
-
 - Tray icon
 
-- Idle indexing
+## Search
 
-- Multi-folder support
+- Semantic similarity ranking
+- Reverse image search
+- OCR
+- Duplicate grouping
+
+## Organisation
 
 - Tagging
-
+- AI-assisted image renaming
 - EXIF support
+- Multi-folder support
 
-- Video support (future)
+## AI
 
-- GIF support
+- AI editing
+- ComfyUI nodes
 
+## Extensibility
 
+- Plugin system
+- REST API
 
-Super secret ideas for > 1.0 release
+## Media
 
-- 2010's cracked game keygen inspired launcher
+- Video support
+- GIF improvements
 
-- Display search results ranked by semantic similarity (highest relevance first)
+## Future / 1.0+
 
-- AI-assisted image renaming based on visual content
+- 2010s keygen-inspired launcher
