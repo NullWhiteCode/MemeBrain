@@ -35,6 +35,7 @@ Memes/
 - ✅ Instant filename search
 - ✅ Recursive subfolder support
 - ✅ Responsive web interface
+- ✅ Native folder picker
 
 ## Planned Features
 
@@ -67,7 +68,6 @@ Memes/
 
 ### Quality of Life
 
-- Native folder picker
 - Lightbox image viewer
 - Idle indexing
 - Tray icon
