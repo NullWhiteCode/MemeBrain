@@ -4,6 +4,8 @@ A local-first media browser with AI-assisted search and organisation.
 
 Browse, search and organise your local image collection without uploading your files to the cloud.
 
+**Search by filenames, tags, or what's actually in your images using local AI models.**
+
 Designed for people whose folders look like this:
 
 ```text
