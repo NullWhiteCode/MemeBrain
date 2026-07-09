@@ -67,7 +67,9 @@
                 alt="{{ file }}"
               />
             </a>
-            <figcaption>{{ file }}</figcaption>
+            <figcaption class="filename" title="{{ file }}">
+              {{ file }}
+            </figcaption>
           </figure>
           {% endfor %}
         </div>
