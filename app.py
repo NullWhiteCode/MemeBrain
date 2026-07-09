@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, send_from_directory
 from pathlib import Path
+import tkinter as tk
+from tkinter import filedialog
 
 """
 MemeBrain
@@ -54,6 +56,7 @@ def search_file_names(folder_path, search_pattern):
 def home():
     folder_path = None
     search_pattern = ""
+    folder_name = ""
 
     files = []
     directories = []
@@ -64,13 +67,14 @@ def home():
         search_pattern = request.form.get("search_pattern", "").strip()
         
         folder_path = Path(folder_path)
+        folder_name = folder_path.name
         files, directories = get_folder_contents(folder_path)
 
         if search_pattern:
             files = search_file_names(folder_path, search_pattern)
 
 
-    return render_template('index.html', folder_path=folder_path, files=files, directories=directories, search_pattern=search_pattern)
+    return render_template('index.html', folder_path=folder_path, files=files, directories=directories, search_pattern=search_pattern, folder_name=folder_name)
 
 
 @app.route('/file/<path:filename>')
@@ -86,6 +90,44 @@ def serve_image(filename):
     else:
         return "File not found or unsupported file type.", 404
     
+
+@app.route('/folder_browser')
+def folder_browser():
+    root = tk.Tk()
+    root.withdraw()
+    root.attributes("-topmost", True)
+
+    folder_path = filedialog.askdirectory(
+        title="Select a folder to browse",
+        parent=root
+    )
+
+    root.destroy()
+
+    
+
+    if folder_path == "":
+        return render_template(
+            "index.html",
+            folder_path=None,
+            files=[],
+            directories=[],
+            search_pattern="",
+            folder_name=None
+        )
+    
+    folder_name = Path(folder_path).name
+
+    files, directories = get_folder_contents(folder_path)
+    return render_template(
+        'index.html',
+        folder_path=folder_path,
+        files=files,
+        directories=directories,
+        search_pattern="",
+        folder_name=folder_name
+    )
+
 
 if __name__ == '__main__':
     app.run(debug=True)

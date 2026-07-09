@@ -11,65 +11,80 @@
   </head>
   <body>
     <main class="container">
-      <h1>MemeBrain</h1>
+      <h1><b>MemeBrain</b></h1>
 
-      <p>Current folder: {{ folder_path }}</p>
+      <div class="panel">
+        <section>
+          <h2>📁 {{ folder_name or "Library" }}</h2>
+          <p class="folder-path">{{ folder_path or "No folder selected" }}</p>
 
-      <form method="POST">
-        <label for="folder_path">Folder path:</label>
-        <input
-          type="text"
-          id="folder_path"
-          name="folder_path"
-          value="{{ folder_path or '' }}"
-        />
-        <button type="submit">Save folder</button>
-        <label for="search_pattern">Search:</label>
-        <input
-          type="text"
-          id="search_pattern"
-          name="search_pattern"
-          value="{{ search_pattern or '' }}"
-        />
-        <button type="submit">Search</button>
-      </form>
+          <form method="GET" action="{{ url_for('folder_browser') }}">
+            <button class="folder-button" type="submit">Select Folder</button>
+          </form>
+        </section>
 
-      <p>
-        {{ files|length }} images found. {{ directories|length }} directories
-        found.
-      </p>
-
-      <h2>Images</h2>
-
-      <!-- Image gallery -->
-      {% if files %}
-      <div class="image-grid">
-        {% for file in files %}
-        <figure class="image-card">
-          <a
-            href="{{ url_for('serve_image', filename=file, folder_path=folder_path) }}"
-            target="_blank"
-          >
-            <img
-              src="{{ url_for('serve_image', filename=file, folder_path=folder_path) }}"
-              alt="{{ file }}"
+        <section>
+          <h2><b>🔍 Search</b></h2>
+          <form method="POST" action="{{ url_for('home') }}" class="search-bar">
+            <input
+              type="hidden"
+              name="folder_path"
+              value="{{ folder_path or '' }}"
             />
-          </a>
-          <figcaption>{{ file }}</figcaption>
-        </figure>
-        {% endfor %}
-      </div>
-      {% else %}
-      <p>No images found in the selected folder.</p>
-      {% endif %}
 
-      <!-- Directory list -->
-      <h2>Directories</h2>
-      <ul>
-        {% for directory in directories %}
-        <li>{{ directory }}</li>
-        {% endfor %}
-      </ul>
+            <input
+              type="text"
+              id="search_pattern"
+              name="search_pattern"
+              value="{{ search_pattern or '' }}"
+              placeholder="Search filenames..."
+            />
+
+            <button type="submit">Search</button>
+          </form>
+
+          <p>
+            {{ files|length }} images found. {{ directories|length }}
+            directories found.
+          </p>
+        </section>
+      </div>
+
+      <section>
+        <h2><b>🖼️ Images</b></h2>
+
+        <!-- Image gallery -->
+        {% if files %}
+        <div class="image-grid">
+          {% for file in files %}
+          <figure class="image-card">
+            <a
+              href="{{ url_for('serve_image', filename=file, folder_path=folder_path) }}"
+              target="_blank"
+            >
+              <img
+                src="{{ url_for('serve_image', filename=file, folder_path=folder_path) }}"
+                alt="{{ file }}"
+              />
+            </a>
+            <figcaption>{{ file }}</figcaption>
+          </figure>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p>No images found in the selected folder.</p>
+        {% endif %}
+      </section>
+
+      <section>
+        <!-- Directory list -->
+        <h2><b>📂 Directories</b></h2>
+        <ul>
+          {% for directory in directories %}
+          <li>{{ directory }}</li>
+          {% endfor %}
+        </ul>
+      </section>
     </main>
   </body>
 </html>
