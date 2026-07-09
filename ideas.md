@@ -35,4 +35,5 @@
 
 ## Future / 1.0+
 
-- 2010s keygen-inspired launcher
+- 2010s keygen-inspired launcher (for loading models etc)
+- PSX/CRT inspired UI
