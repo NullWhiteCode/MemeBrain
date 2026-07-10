@@ -34,7 +34,6 @@
   word-break: break-word;
 }
 
-.image-card filename,
 .image-card .filename {
   font-weight: bold;
   color: #333;
