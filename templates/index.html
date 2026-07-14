@@ -8,6 +8,14 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='CSS/style.css') }}"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/lightbox3@1/dist/lightbox3.css"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/lightbox3@1/dist/lightbox3.min.js"
+      async
+    ></script>
   </head>
   <body>
     <main class="container">
@@ -60,7 +68,8 @@
           <figure class="image-card">
             <a
               href="{{ url_for('serve_image', filename=file, folder_path=folder_path) }}"
-              target="_blank"
+              data-lightbox="gallery"
+              data-caption="{{ file }}"
             >
               <img
                 src="{{ url_for('serve_image', filename=file, folder_path=folder_path) }}"
@@ -88,5 +97,6 @@
         </ul>
       </section>
     </main>
+    <script src="https://cdn.jsdelivr.net/npm/lightbox3@1/dist/lightbox3.min.js"></script>
   </body>
 </html>
