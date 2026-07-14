@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, send_from_directory
 from pathlib import Path
+import json
 import tkinter as tk
 from tkinter import filedialog
 
@@ -20,6 +21,8 @@ SUPPORTED_EXTENSIONS = {
 ".webp",
 ".bmp"
 }
+
+CONFIG_FILE = Path("config.json")
 
 
 def get_folder_contents(folder_path):
@@ -52,6 +55,26 @@ def search_file_names(folder_path, search_pattern):
     return matching_files
 
 
+def save_library_path(folder_path):
+    """Save the library path to the JSON config file."""
+    json_data = json.dumps(
+        {"folder_path": str(folder_path)},
+        indent=2
+    )
+
+    CONFIG_FILE.write_text(json_data, encoding="utf-8")
+
+
+def load_library_path():
+    """Load the saved library path from the JSON config file."""
+    if CONFIG_FILE.exists():
+        json_data = CONFIG_FILE.read_text(encoding="utf-8")
+        parsed_data = json.loads(json_data)
+        return parsed_data.get("folder_path")
+    
+    return None
+
+
 @app.route('/', methods=['GET', 'POST'])
 def home():
     folder_path = None
@@ -60,6 +83,14 @@ def home():
 
     files = []
     directories = []
+
+    saved_path = load_library_path()
+
+    if saved_path:
+        folder_path = Path(saved_path)
+        if folder_path.is_dir():
+            files, directories = get_folder_contents(folder_path)
+            folder_name = folder_path.name
 
     if request.method == 'POST':
         # Preserve the current folder and search text after the form is submitted.
@@ -104,8 +135,6 @@ def folder_browser():
 
     root.destroy()
 
-    
-
     if folder_path == "":
         return render_template(
             "index.html",
@@ -117,6 +146,8 @@ def folder_browser():
         )
     
     folder_name = Path(folder_path).name
+
+    save_library_path(folder_path)
 
     files, directories = get_folder_contents(folder_path)
     return render_template(
