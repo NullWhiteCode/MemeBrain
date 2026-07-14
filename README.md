@@ -38,6 +38,7 @@ Memes/
 - ✅ Recursive subfolder support
 - ✅ Responsive web interface
 - ✅ Native folder picker
+- ✅ Lightbox image viewer
 
 ## Planned Features
 
@@ -70,6 +71,5 @@ Memes/
 
 ### Quality of Life
 
-- Lightbox image viewer
 - Idle indexing
 - Tray icon
