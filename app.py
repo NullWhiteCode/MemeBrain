@@ -56,13 +56,13 @@ def search_file_names(folder_path, search_pattern):
 
 
 def save_library_path(folder_path):
-    """Save the library path to the JSON config file."""
-    json_data = json.dumps(
-        {"folder_path": str(folder_path)},
-        indent=2
-    )
+    if CONFIG_FILE.exists():
+        json_data = CONFIG_FILE.read_text(encoding="utf-8")
+        parsed_data = json.loads(json_data)
+        parsed_data["library_path"] = str(folder_path)
+        json_data = json.dumps(parsed_data, indent=2)
 
-    CONFIG_FILE.write_text(json_data, encoding="utf-8")
+        CONFIG_FILE.write_text(json_data, encoding="utf-8")
 
 
 def load_library_path():
@@ -70,10 +70,28 @@ def load_library_path():
     if CONFIG_FILE.exists():
         json_data = CONFIG_FILE.read_text(encoding="utf-8")
         parsed_data = json.loads(json_data)
-        return parsed_data.get("folder_path")
+        return parsed_data.get("library_path")
     
     return None
 
+
+def save_current_folder(folder_path):
+    if CONFIG_FILE.exists():
+        json_data = CONFIG_FILE.read_text(encoding="utf-8")
+        parsed_data = json.loads(json_data)
+        parsed_data["current_folder"] = str(folder_path)
+        json_data = json.dumps(parsed_data, indent=2)
+
+        CONFIG_FILE.write_text(json_data, encoding="utf-8")
+
+    
+def load_current_folder():
+    if CONFIG_FILE.exists():
+        json_data = CONFIG_FILE.read_text(encoding="utf-8")
+        parsed_data = json.loads(json_data)
+        return parsed_data.get("current_folder")
+    
+    return None
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
@@ -84,10 +102,12 @@ def home():
     files = []
     directories = []
 
-    saved_path = load_library_path()
+    library_path = load_library_path()
+    current_folder = load_current_folder() or ""
 
-    if saved_path:
-        folder_path = Path(saved_path)
+    if library_path:
+        folder_path = Path(library_path) / current_folder
+
         if folder_path.is_dir():
             files, directories = get_folder_contents(folder_path)
             folder_name = folder_path.name
@@ -148,7 +168,35 @@ def folder_browser():
     folder_name = Path(folder_path).name
 
     save_library_path(folder_path)
+    save_current_folder("")
 
+    files, directories = get_folder_contents(folder_path)
+    return render_template(
+        'index.html',
+        folder_path=folder_path,
+        files=files,
+        directories=directories,
+        search_pattern="",
+        folder_name=folder_name
+    )
+
+
+@app.route('/path/<path:subpath>')
+def subfolder_selection(subpath):
+    root_folder = load_library_path()
+    if not root_folder:
+        return "No library selected.", 400
+    
+    current_saved_path = load_current_folder() or ""
+    new_current_folder = Path(current_saved_path) / subpath
+    folder_path = Path(root_folder) / new_current_folder
+
+    if not folder_path.is_dir():
+        return "Folder not found.", 404
+    
+    save_current_folder(new_current_folder)
+
+    folder_name = folder_path.name
     files, directories = get_folder_contents(folder_path)
     return render_template(
         'index.html',

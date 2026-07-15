@@ -92,7 +92,11 @@
         <h2><b>📂 Directories</b></h2>
         <ul>
           {% for directory in directories %}
-          <li>{{ directory }}</li>
+          <li>
+            <a href="{{ url_for('subfolder_selection', subpath=directory) }}">
+              {{ directory }}
+            </a>
+          </li>
           {% endfor %}
         </ul>
       </section>
