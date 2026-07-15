@@ -25,6 +25,20 @@
         <section>
           <h2>📁 Current Folder:</h2>
           <h2>{{ folder_name or "Library" }}</h2>
+          <section>
+            <p class="breadcrumbs">
+              {% if library_name %}
+              <a href="{{ url_for('root_navigation_route') }}">
+                {{ library_name }}
+              </a>
+              {% endif %} {% if breadcrumbs %} / {% endif %} {% for crumb in
+              breadcrumbs %}
+              <a href="{{ url_for('navigate_folder', subpath=crumb['link']) }}">
+                {{ crumb['display'] }}
+              </a>
+              {% if not loop.last %} / {% endif %} {% endfor %}
+            </p>
+          </section>
           <p class="folder-path">{{ folder_path or "No folder selected" }}</p>
 
           <form method="GET" action="{{ url_for('folder_browser') }}">
@@ -77,20 +91,6 @@
           </ul>
         </section>
       </div>
-      <section>
-        <p class="breadcrumbs">
-          {% if library_name %}
-          <a href="{{ url_for('root_navigation_route') }}">
-            {{ library_name }}
-          </a>
-          {% endif %} {% if breadcrumbs %} / {% endif %} {% for crumb in
-          breadcrumbs %}
-          <a href="{{ url_for('navigate_folder', subpath=crumb['link']) }}">
-            {{ crumb['display'] }}
-          </a>
-          {% if not loop.last %} / {% endif %} {% endfor %}
-        </p>
-      </section>
 
       <section>
         <h2><b>🖼️ Images</b></h2>
