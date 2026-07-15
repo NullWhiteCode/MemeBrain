@@ -21,9 +21,10 @@
     <main class="container">
       <h1><b>MemeBrain</b></h1>
 
-      <div class="panel">
+      <div class="panel" .grid-container>
         <section>
-          <h2>📁 {{ folder_name or "Library" }}</h2>
+          <h2>📁 Current Folder:</h2>
+          <h2>{{ folder_name or "Library" }}</h2>
           <p class="folder-path">{{ folder_path or "No folder selected" }}</p>
 
           <form method="GET" action="{{ url_for('folder_browser') }}">
@@ -56,7 +57,40 @@
             directories found.
           </p>
         </section>
+
+        <section>
+          <!-- Directory list -->
+          <h2><b>📂 Directories</b></h2>
+          <ul>
+            {% for directory in directories %}
+            <li>
+              <a
+                href="{{ url_for(
+                'navigate_folder',
+                subpath=(current_folder ~ '/' ~ directory) if current_folder else directory
+                ) }}"
+              >
+                {{ directory }}
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+        </section>
       </div>
+      <section>
+        <p class="breadcrumbs">
+          {% if library_name %}
+          <a href="{{ url_for('root_navigation_route') }}">
+            {{ library_name }}
+          </a>
+          {% endif %} {% if breadcrumbs %} / {% endif %} {% for crumb in
+          breadcrumbs %}
+          <a href="{{ url_for('navigate_folder', subpath=crumb['link']) }}">
+            {{ crumb['display'] }}
+          </a>
+          {% if not loop.last %} / {% endif %} {% endfor %}
+        </p>
+      </section>
 
       <section>
         <h2><b>🖼️ Images</b></h2>
@@ -85,20 +119,6 @@
         {% else %}
         <p>No images found in the selected folder.</p>
         {% endif %}
-      </section>
-
-      <section>
-        <!-- Directory list -->
-        <h2><b>📂 Directories</b></h2>
-        <ul>
-          {% for directory in directories %}
-          <li>
-            <a href="{{ url_for('subfolder_selection', subpath=directory) }}">
-              {{ directory }}
-            </a>
-          </li>
-          {% endfor %}
-        </ul>
       </section>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/lightbox3@1/dist/lightbox3.min.js"></script>

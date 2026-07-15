@@ -26,21 +26,17 @@ CONFIG_FILE = Path("config.json")
 
 
 def get_folder_contents(folder_path):
-    """Return supported image files and directories beneath folder_path."""
+    """Return supported image files and immediate directories."""
     folder_path = Path(folder_path)
     files = []
     directories = []
 
     if folder_path.is_dir():
-        for child in sorted(folder_path.rglob('*')):
+        for child in sorted(folder_path.iterdir()):
             if child.is_file() and child.suffix.lower() in SUPPORTED_EXTENSIONS:
-                # Store paths relative to the selected folder so they can be
-                # displayed and served correctly from nested directories.
-                files.append(child.relative_to(folder_path).as_posix())
-
-        for child in folder_path.iterdir():
-            if child.is_dir():
-                directories.append(child.relative_to(folder_path).as_posix())
+                files.append(child.name)
+            elif child.is_dir():
+                directories.append(child.name)
 
     return files, directories
 
@@ -95,6 +91,25 @@ def load_current_folder():
     
     return None
 
+
+def split_path_parts(current_folder):
+    path_parts = Path(current_folder).parts
+    cumulative_path = []
+    breadcrumbs = []
+
+    for part in path_parts:
+        cumulative_path.append(part)
+        breadcrumbs.append(
+            {
+                "display": part,
+                "link": Path(*cumulative_path).as_posix(),
+            }
+        )
+
+    return breadcrumbs
+
+
+
 @app.route('/', methods=['GET', 'POST'])
 def home():
     folder_path = None
@@ -105,9 +120,12 @@ def home():
     directories = []
 
     library_path = load_library_path()
+    library_name = None
     current_folder = load_current_folder() or ""
+    breadcrumbs = split_path_parts(current_folder)
 
     if library_path:
+        library_name = Path(library_path).name
         folder_path = Path(library_path) / current_folder
 
         if folder_path.is_dir():
@@ -127,7 +145,7 @@ def home():
             files = search_file_names(folder_path, search_pattern)
 
 
-    return render_template('index.html', folder_path=folder_path, files=files, directories=directories, search_pattern=search_pattern, folder_name=folder_name)
+    return render_template('index.html', folder_path=folder_path, files=files, directories=directories, search_pattern=search_pattern, folder_name=folder_name, breadcrumbs=breadcrumbs, current_folder=current_folder, library_name=library_name)
 
 
 @app.route('/file/<path:filename>')
@@ -164,13 +182,17 @@ def folder_browser():
             files=[],
             directories=[],
             search_pattern="",
-            folder_name=None
+            folder_name=None,
+            breadcrumbs=[],
+            current_folder="",
+            library_name=None
         )
     
     folder_name = Path(folder_path).name
 
     save_library_path(folder_path)
     save_current_folder("")
+    breadcrumbs = []
 
     files, directories = get_folder_contents(folder_path)
     return render_template(
@@ -179,25 +201,29 @@ def folder_browser():
         files=files,
         directories=directories,
         search_pattern="",
-        folder_name=folder_name
+        folder_name=folder_name,
+        breadcrumbs=breadcrumbs,
+        current_folder="",
+        library_name=Path(folder_path).name
     )
 
 
-@app.route('/path/<path:subpath>')
-def subfolder_selection(subpath):
+@app.route("/path/<path:subpath>")
+def navigate_folder(subpath):
     root_folder = load_library_path()
     if not root_folder:
         return "No library selected.", 400
     
-    current_saved_path = load_current_folder() or ""
-    new_current_folder = Path(current_saved_path) / subpath
+    new_current_folder = subpath
     folder_path = Path(root_folder) / new_current_folder
 
     if not folder_path.is_dir():
         return "Folder not found.", 404
     
     save_current_folder(new_current_folder)
+    breadcrumbs = split_path_parts(new_current_folder)
 
+    library_name = Path(root_folder).name
     folder_name = folder_path.name
     files, directories = get_folder_contents(folder_path)
     return render_template(
@@ -206,8 +232,35 @@ def subfolder_selection(subpath):
         files=files,
         directories=directories,
         search_pattern="",
-        folder_name=folder_name
+        folder_name=folder_name,
+        breadcrumbs=breadcrumbs,
+        current_folder=new_current_folder,
+        library_name=library_name
     )
+
+@app.route('/library_root')
+def root_navigation_route():
+    root_folder = load_library_path()
+    if not root_folder:
+        return "No library selected.", 400
+    
+    save_current_folder("")
+    files, directories = get_folder_contents(root_folder)
+    
+    return render_template(
+        'index.html',
+        folder_path=root_folder,
+        files=files,
+        directories=directories,
+        search_pattern="",
+        folder_name=Path(root_folder).name,
+        breadcrumbs=[],
+        current_folder="",
+        library_name=Path(root_folder).name
+    )
+
+    
+
 
 
 if __name__ == '__main__':
