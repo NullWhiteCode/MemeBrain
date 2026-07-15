@@ -37,7 +37,9 @@ def get_folder_contents(folder_path):
                 # Store paths relative to the selected folder so they can be
                 # displayed and served correctly from nested directories.
                 files.append(child.relative_to(folder_path).as_posix())
-            elif child.is_dir():
+
+        for child in folder_path.iterdir():
+            if child.is_dir():
                 directories.append(child.relative_to(folder_path).as_posix())
 
     return files, directories
