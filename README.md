@@ -39,6 +39,7 @@ Memes/
 - ✅ Responsive web interface
 - ✅ Native folder picker
 - ✅ Lightbox image viewer
+- ✅ Metadata info panel
 
 ## Planned Features
 
