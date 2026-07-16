@@ -95,6 +95,24 @@
         </section>
       </div>
 
+      <div class="panel"></div>
+      <section class="metadata-panel">
+        <h2>🛈 Image Details</h2>
+        {% if metadata %}
+        <dl class="metadata-list">
+          <dt>Filename:</dt>
+          <dd>{{ metadata.filename }}</dd>
+          <dt>Extension:</dt>
+          <dd>{{ metadata.extension }}</dd>
+          <dt>Filesize:</dt>
+          <dd>{{ metadata.filesize }}</dd>
+          <dt>Modified:</dt>
+          <dd>{{ metadata.modified }}</dd>
+        </dl>
+        {% endif %}
+      </section>
+      </div>
+
       <section>
         <h2><b>🖼️ Images</b></h2>
 
@@ -103,7 +121,7 @@
         <div class="image-grid">
           {% for file in files %}
           <figure class="image-card">
-            <a
+            <a 
               href="{{ url_for('serve_image', filename=file, folder_path=folder_path) }}"
               data-lightbox="gallery"
               data-caption="{{ file }}"
@@ -113,9 +131,17 @@
                 alt="{{ file }}"
               />
             </a>
+
             <figcaption class="filename" title="{{ file }}">
               {{ file }}
             </figcaption>
+
+            <a
+              class="details-button"
+              href="{{ url_for('image_metadata', filename=file) }}"
+            >
+              Details
+            </a>
           </figure>
           {% endfor %}
         </div>

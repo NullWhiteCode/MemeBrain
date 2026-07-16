@@ -3,6 +3,7 @@ from pathlib import Path
 import json
 import tkinter as tk
 from tkinter import filedialog
+from datetime import datetime
 
 """
 MemeBrain
@@ -109,6 +110,33 @@ def split_path_parts(current_folder):
     return breadcrumbs
 
 
+def get_image_metadata(image_path):
+    image_path = Path(image_path)
+    file_stats = image_path.stat()
+    if not image_path.is_file():
+        return None
+
+    metadata = {
+        "filename": image_path.name,
+        "extension": image_path.suffix.lower(),
+        "filesize": format_filesize(file_stats.st_size),
+        "modified": format_timestamp(file_stats.st_mtime),
+    }
+    return metadata
+
+
+def format_filesize(filesize):
+    for unit in ['B', 'KB', 'MB']:
+        if filesize < 1024.0:
+            return f"{filesize:.2f} {unit}"
+        filesize /= 1024.0
+    return f"{filesize:.2f} GB"
+
+
+def format_timestamp(timestamp):
+    dt = datetime.fromtimestamp(timestamp)
+    return dt.strftime("%Y-%m-%d %H:%M:%S")
+
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
@@ -123,6 +151,7 @@ def home():
     library_name = None
     current_folder = load_current_folder() or ""
     breadcrumbs = split_path_parts(current_folder)
+    metadata = None
 
     if library_path:
         library_name = Path(library_path).name
@@ -145,7 +174,7 @@ def home():
             files = search_file_names(folder_path, search_pattern)
 
 
-    return render_template('index.html', folder_path=folder_path, files=files, directories=directories, search_pattern=search_pattern, folder_name=folder_name, breadcrumbs=breadcrumbs, current_folder=current_folder, library_name=library_name)
+    return render_template('index.html', folder_path=folder_path, files=files, directories=directories, search_pattern=search_pattern, folder_name=folder_name, breadcrumbs=breadcrumbs, current_folder=current_folder, library_name=library_name, metadata=metadata)
 
 
 @app.route('/file/<path:filename>')
@@ -193,6 +222,7 @@ def folder_browser():
     save_library_path(folder_path)
     save_current_folder("")
     breadcrumbs = []
+    metadata = None
 
     files, directories = get_folder_contents(folder_path)
     return render_template(
@@ -204,7 +234,8 @@ def folder_browser():
         folder_name=folder_name,
         breadcrumbs=breadcrumbs,
         current_folder="",
-        library_name=Path(folder_path).name
+        library_name=Path(folder_path).name,
+        metadata=metadata
     )
 
 
@@ -226,6 +257,7 @@ def navigate_folder(subpath):
     library_name = Path(root_folder).name
     folder_name = folder_path.name
     files, directories = get_folder_contents(folder_path)
+    metadata = None
     return render_template(
         'index.html',
         folder_path=folder_path,
@@ -235,7 +267,8 @@ def navigate_folder(subpath):
         folder_name=folder_name,
         breadcrumbs=breadcrumbs,
         current_folder=new_current_folder,
-        library_name=library_name
+        library_name=library_name,
+        metadata=metadata
     )
 
 @app.route('/library_root')
@@ -246,6 +279,7 @@ def root_navigation_route():
     
     save_current_folder("")
     files, directories = get_folder_contents(root_folder)
+    metadata = None
     
     return render_template(
         'index.html',
@@ -256,12 +290,28 @@ def root_navigation_route():
         folder_name=Path(root_folder).name,
         breadcrumbs=[],
         current_folder="",
-        library_name=Path(root_folder).name
+        library_name=Path(root_folder).name,
+        metadata=metadata
     )
 
+
+@app.route('/image_metadata/<path:filename>')
+def image_metadata(filename):
+    library_root = load_library_path()
+    current_folder = load_current_folder() or ""
+    folder_path = Path(library_root) / current_folder
+    image_path = folder_path / filename
+
+    if image_path.is_file() and image_path.suffix.lower() in SUPPORTED_EXTENSIONS:
+        metadata = get_image_metadata(image_path)
+        files, directories = get_folder_contents(folder_path)
+
+        return render_template('index.html', folder_path=folder_path, files=files, directories=directories, search_pattern="", folder_name=folder_path.name, breadcrumbs=split_path_parts(current_folder), current_folder=current_folder, library_name=Path(library_root).name, metadata=metadata)
+    
+    return "File not found or unsupported file type.", 404
+    
     
 
-
-
+    
 if __name__ == '__main__':
     app.run(debug=True)

@@ -77,6 +77,7 @@ body {
   text-decoration-thickness: 2px;
   text-underline-offset: 2px;
 }
+
 /* Directory navigation */
 
 .directory-list {
@@ -128,6 +129,36 @@ body {
 .search-bar input {
   min-width: 0;
   flex: 1;
+}
+
+/* Metadata display */
+
+.metadata-panel {
+  margin-top: 0.7rem;
+  padding: 0.5rem;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.metadata-list {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.5rem 1rem;
+}
+
+.metadata-list dt,
+.metadata-list dd {
+  margin: 0;
+}
+
+.metadata-list dt {
+  font-weight: bold;
+}
+
+.metadata-list dd {
+  overflow-wrap: anywhere;
 }
 
 /* Image gallery */
