@@ -1,47 +1,9 @@
-.image-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-  align-items: start;
-}
+/* Page layout */
 
-.image-card {
-  transition: transform 0.15s ease;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 0.75rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  max-width: 100%;
-}
-
-.image-card img {
-  width: 100%;
-  height: 340px;
-  object-fit: contain;
-  display: block;
-  border-radius: 6px;
-  background: #eee;
-}
-
-.image-card:hover {
-  transform: translateY(-3px);
-}
-
-.image-card figcaption {
-  margin-top: 0.5rem;
-  font-size: 0.95rem;
-  word-break: break-word;
-}
-
-.image-card .filename {
-  font-weight: bold;
-  color: #333;
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 100%;
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f5f5f5;
 }
 
 .container {
@@ -50,116 +12,189 @@
   padding: 1rem;
 }
 
+/* Top dashboard */
+
 .panel {
-  background-color: #f5f5f5;
-  padding: 10px;
-  border-radius: 5px;
   display: grid;
-  grid-template-columns: repeat(3, minmax(240px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   grid-template-areas: "current directories search";
   gap: 1.5rem;
   align-items: start;
+  padding: 10px;
 }
 
 .panel > section {
+  padding: 1rem;
   background: #bebebe;
   border-radius: 4px;
-  padding: 0.5rem;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
-body {
-  font-family: Arial, sans-serif;
-  background: #f5f5f5;
+.current-panel {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem;
 }
+
+.current-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.current-panel > form {
+  display: flex;
+  align-items: center;
+}
+
+.directories-panel {
+  grid-area: directories;
+}
+
+.search-panel {
+  grid-area: search;
+}
+
+/* Folder information */
 
 .folder-path {
   color: #666;
   font-size: 0.9rem;
+  overflow-wrap: anywhere;
 }
 
-.folder-button {
-  background: #75b2f3;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
+.breadcrumbs {
+  overflow-wrap: anywhere;
+  font-size: 0.8rem;
 }
 
-.folder-button:hover {
-  background: #5a9bd8;
+.breadcrumbs a {
+  color: #20435a;
+  text-decoration: underline;
 }
 
-.search-bar {
-  width: 320px;
-  margin-bottom: 1rem;
-  display: flex;
+.breadcrumbs a:hover {
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+}
+/* Directory navigation */
+
+.directory-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
+.directory-list li + li {
+  margin-top: 0.25rem;
+}
+
+.directory-list a {
+  text-decoration: none;
+}
+
+.directory-list a:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+/* Shared buttons */
+
+.folder-button,
 .search-bar button {
   padding: 0.5rem 1rem;
-  background: #75b2f3;
   color: #fff;
-  border: none;
+  background: #75b2f3;
+  border: 0;
   border-radius: 4px;
   cursor: pointer;
 }
 
+.folder-button:hover,
 .search-bar button:hover {
   background: #5a9bd8;
 }
 
-/* Assign the three sections inside .panel to grid areas using their order
-   (keeps HTML unchanged). 1=Current Folder, 2=Search, 3=Directories */
-.panel > section:nth-of-type(1) {
-  grid-area: current;
+/* Search */
+
+.search-bar {
+  display: flex;
+  width: 100%;
+  max-width: 320px;
+  margin-bottom: 1rem;
+}
+
+.search-bar input {
+  min-width: 0;
+  flex: 1;
+}
+
+/* Image gallery */
+
+.image-grid {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0.5rem;
-  align-items: center;
-  padding: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  align-items: start;
 }
 
-/* First h2 (title) spans both columns */
-.panel > section:nth-of-type(1) > h2:nth-of-type(1) {
-  grid-column: 1 / -1;
-  grid-row: 1;
+.image-card {
+  padding: 0.75rem;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: transform 0.15s ease;
 }
 
-/* Second h2 (folder name) in first column, row 2 */
-.panel > section:nth-of-type(1) > h2:nth-of-type(2) {
-  grid-column: 1;
-  grid-row: 2;
-  margin: 0;
+.image-card:hover {
+  transform: translateY(-3px);
 }
 
-/* Form button in second column, row 2 */
-.panel > section:nth-of-type(1) > form {
-  grid-column: 2;
-  grid-row: 2;
+.image-card img {
+  display: block;
+  width: 100%;
+  height: 340px;
+  object-fit: contain;
+  background: #eee;
+  border-radius: 6px;
 }
 
-/* Other elements span both columns */
-.panel > section:nth-of-type(1) > section,
-.panel > section:nth-of-type(1) > p {
-  grid-column: 1 / -1;
-  grid-row: auto;
-}
-.panel > section:nth-of-type(2) {
-  grid-area: search;
-}
-.panel > section:nth-of-type(3) {
-  grid-area: directories;
+.image-card .filename {
+  display: block;
+  max-width: 100%;
+  margin-top: 0.5rem;
+  overflow: hidden;
+  color: #333;
+  font-size: 0.95rem;
+  font-weight: bold;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* Responsive: stack sections on narrow viewports */
-@media (max-width: 800px) {
+/* Responsive layout */
+
+@media (max-width: 900px) {
   .panel {
     grid-template-columns: 1fr;
     grid-template-areas:
       "current"
-      "search"
-      "directories";
+      "directories"
+      "search";
+  }
+}
+
+@media (max-width: 420px) {
+  .image-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .current-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .current-panel > form {
+    grid-column: 1;
   }
 }
