@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request, send_from_directory
 from pathlib import Path
-import json
+import json, mimetypes
 import tkinter as tk
 from tkinter import filedialog
 from datetime import datetime
+from PIL import Image
 
 """
 MemeBrain
@@ -112,16 +113,25 @@ def split_path_parts(current_folder):
 
 def get_image_metadata(image_path):
     image_path = Path(image_path)
-    file_stats = image_path.stat()
+
     if not image_path.is_file():
         return None
 
-    metadata = {
-        "filename": image_path.name,
-        "extension": image_path.suffix.lower(),
-        "filesize": format_filesize(file_stats.st_size),
-        "modified": format_timestamp(file_stats.st_mtime),
-    }
+    file_stats = image_path.stat()
+
+    with Image.open(image_path) as image_stats:
+        metadata = {
+            "filename": image_path.name,
+            "extension": image_path.suffix.lower(),
+            "filesize": format_filesize(file_stats.st_size),
+            "modified": format_timestamp(file_stats.st_mtime),
+            "created": format_timestamp(file_stats.st_birthtime),
+            "mime_type": mimetypes.guess_type(str(image_path))[0] or "Unknown",
+            "dimensions": f"{image_stats.width} × {image_stats.height}",
+            "mode": image_stats.mode,
+            "animated": getattr(image_stats, "is_animated", False),
+        }
+
     return metadata
 
 
