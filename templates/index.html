@@ -12,10 +12,6 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/lightbox3@1/dist/lightbox3.css"
     />
-    <script
-      src="https://cdn.jsdelivr.net/npm/lightbox3@1/dist/lightbox3.min.js"
-      async
-    ></script>
   </head>
   <body>
     <main class="container">
@@ -121,34 +117,33 @@
         </dl>
         {% endif %}
       </section>
-      </div>
 
       <section>
         <h2><b>🖼️ Images</b></h2>
 
         <!-- Image gallery -->
-        {% if files %}
+        {% if gallery %}
         <div class="image-grid">
-          {% for file in files %}
+          {% for item in gallery %}
           <figure class="image-card">
-            <a 
-              href="{{ url_for('serve_image', filename=file, folder_path=folder_path) }}"
+            <a
+              href="{{ url_for('serve_image', filename=item.filename, folder_path=folder_path) }}"
               data-lightbox="gallery"
-              data-caption="{{ file }}"
+              data-caption="{{ item.filename }}"
             >
               <img
-                src="{{ url_for('serve_image', filename=file, folder_path=folder_path) }}"
-                alt="{{ file }}"
+                src="{{ url_for('serve_thumbnail', filename=item.thumbnail) }}"
+                alt="{{ item.filename }}"
               />
             </a>
 
-            <figcaption class="filename" title="{{ file }}">
-              {{ file }}
+            <figcaption class="filename" title="{{ item.filename }}">
+              {{ item.filename }}
             </figcaption>
 
             <a
               class="details-button"
-              href="{{ url_for('image_metadata', filename=file) }}"
+              href="{{ url_for('image_metadata', filename=item.filename) }}"
             >
               Details
             </a>
