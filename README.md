@@ -6,6 +6,8 @@ Browse, search and organise your local image collection without uploading your f
 
 **Search by filenames, tags, or what's actually in your images using local AI models.**
 
+**Generate filenames based on what's in your images.**
+
 Designed for people whose folders look like this:
 
 ```text
