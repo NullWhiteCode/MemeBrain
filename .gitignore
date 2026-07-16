@@ -14,3 +14,6 @@ __pycache__/
 
 # Windows
 Thumbs.db
+
+# Cache
+cache/
