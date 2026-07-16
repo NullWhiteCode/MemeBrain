@@ -33,15 +33,25 @@ Memes/
 
 ## Current Features
 
+### Library
 - ✅ Recursive folder scanning
+- ✅ Persistent library selection
+- ✅ Breadcrumb navigation
+- ✅ Folder navigation
+
+### Media
 - ✅ Thumbnail gallery
+- ✅ Cached thumbnail generation
 - ✅ Local image viewer
+- ✅ Image metadata viewer
+- ✅ Lightbox image preview
+
+### Search
 - ✅ Instant filename search
-- ✅ Recursive subfolder support
+
+### Interface
 - ✅ Responsive web interface
 - ✅ Native folder picker
-- ✅ Lightbox image viewer
-- ✅ Metadata info panel
 
 ## Planned Features
 
