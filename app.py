@@ -55,6 +55,21 @@ def search_file_names(folder_path, search_pattern):
     return matching_files
 
 
+def index_library(library_path):
+    indexed_files = []
+
+    for path in Path(library_path).rglob("*"):
+        if path.is_file() and path.suffix.lower() in SUPPORTED_EXTENSIONS:
+            indexed_files.append({
+                "filename": path.name,
+                "path": path,
+                "relative_path": path.relative_to(library_path),
+                "folder": path.parent.relative_to(library_path),
+            })
+
+    return indexed_files
+
+
 def save_library_path(folder_path):
     if CONFIG_FILE.exists():
         json_data = CONFIG_FILE.read_text(encoding="utf-8")
@@ -213,6 +228,14 @@ def home():
     
     if library_path:
         library_name = Path(library_path).name
+
+        library_index = index_library(library_path)
+
+        for item in library_index:
+            if item["folder"] != Path("."):
+                print(item)
+                break
+
         folder_path = Path(library_path) / current_folder
 
         if folder_path.is_dir():
