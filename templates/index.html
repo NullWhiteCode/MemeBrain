@@ -127,7 +127,7 @@
           {% for item in gallery %}
           <figure class="image-card">
             <a
-              href="{{ url_for('serve_image', filename=item.filename, folder_path=folder_path) }}"
+              href="{{ url_for('serve_image', filename=item.relative_path) }}"
               data-lightbox="gallery"
               data-caption="{{ item.filename }}"
             >
