@@ -1,8 +1,7 @@
 # Next
 
-- [ ] Recursive library indexing
-- [ ] Search entire library
 - [ ] Background thumbnail generation
+- [ ] SQLite library database
 - [ ] Duplicate detection
 - [ ] OCR
 - [ ] Semantic search
