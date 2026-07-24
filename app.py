@@ -290,15 +290,14 @@ def root_navigation_route():
 
 @app.route("/image_metadata/<path:filename>")
 def image_metadata(filename):
-    """Display metadata for an image in the current folder."""
+    """Display metadata for an image in the selected library."""
     root_folder = load_library_path()
 
     if not root_folder:
         return "No library selected.", 400
 
-    current_folder = load_current_folder() or ""
-    folder_path = Path(root_folder) / current_folder
-    image_path = folder_path / filename
+    root_folder = Path(root_folder)
+    image_path = root_folder / filename
 
     if (
         not image_path.is_file()
@@ -307,6 +306,10 @@ def image_metadata(filename):
         return "File not found or unsupported file type.", 404
 
     metadata = get_image_metadata(image_path)
+
+    current_folder = load_current_folder() or ""
+    folder_path = root_folder / current_folder
+
     files, directories = get_folder_contents(folder_path)
     library_index = index_library(root_folder)
 
@@ -329,7 +332,7 @@ def image_metadata(filename):
         folder_name=folder_path.name,
         breadcrumbs=split_path_parts(current_folder),
         current_folder=current_folder,
-        library_name=Path(root_folder).name,
+        library_name=root_folder.name,
         metadata=metadata,
         gallery=gallery,
     )

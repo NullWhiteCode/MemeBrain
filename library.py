@@ -103,11 +103,8 @@ def build_gallery(library_path, indexed_files):
             {
                 "filename": item["filename"],
                 "relative_path": item["relative_path"].as_posix(),
-                "thumbnail": (
-                    thumbnail_path.name
-                    if thumbnail_path.exists()
-                    else None
-                ),
+                "thumbnail": thumbnail_path.name,
+                "thumbnail_exists": thumbnail_path.exists()
             }
         )
 
