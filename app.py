@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, send_from_directory
 from pathlib import Path
-import json, mimetypes, hashlib
+import json, mimetypes, hashlib, threading
 import tkinter as tk
 from tkinter import filedialog
 from datetime import datetime
@@ -25,6 +25,8 @@ SUPPORTED_EXTENSIONS = {
 }
 
 CONFIG_FILE = Path("config.json")
+
+thumbnail_thread = None
 
 
 def get_folder_contents(folder_path):
@@ -243,6 +245,22 @@ def format_timestamp(timestamp):
     return dt.strftime("%Y-%m-%d %H:%M:%S")
 
 
+def start_thumbnail_worker(library_index, library_path):
+    global thumbnail_thread
+
+    if thumbnail_thread is not None and thumbnail_thread.is_alive():
+        return thumbnail_thread
+
+    thumbnail_thread = threading.Thread(
+        target=generate_library_thumbnails,
+        args=(library_index, library_path),
+        name="thumbnail-worker",
+        daemon=True,
+    )
+    thumbnail_thread.start()
+    return thumbnail_thread
+
+
 @app.route('/', methods=['GET', 'POST'])
 def home():
     folder_path = None
@@ -256,9 +274,8 @@ def home():
     library_path = load_library_path()
     library_index = index_library(library_path) if library_path else []
 
-    # Temporary test
     if library_path:
-        generate_library_thumbnails(library_index, library_path)
+        start_thumbnail_worker(library_index, library_path)
 
     library_name = None
     current_folder = load_current_folder() or ""
@@ -369,6 +386,7 @@ def folder_browser():
 
     root_folder = load_library_path()
     library_index = index_library(root_folder)
+    start_thumbnail_worker(library_index, root_folder)
     folder_items = get_indexed_folder_items(library_index, folder_path)
     files, directories = get_folder_contents(folder_path)
     gallery = build_gallery(root_folder, folder_items)
