@@ -155,26 +155,41 @@ def build_image_thumbnail(image_path, library_path):
     size = (384, 384)
 
     if not image_path.is_file():
-
         return None
-    
+
     relative_path = image_path.relative_to(library_path)
-    cache_filename = hashlib.md5(str(relative_path).encode("utf-8")).hexdigest()
+    cache_filename = hashlib.md5(
+        str(relative_path).encode("utf-8")
+    ).hexdigest()
+
     cache_dir = Path("cache") / "thumbnails"
     cache_path = cache_dir / f"{cache_filename}.webp"
-    
+
     cache_dir.mkdir(parents=True, exist_ok=True)
 
     if cache_path.exists():
+        return cache_path
+
+    try:
+        with Image.open(image_path) as image:
+            image.thumbnail(size)
+            image.save(cache_path, "WEBP")
 
         return cache_path
-    
-    with Image.open(image_path) as im:
-        im.thumbnail(size)
-        im.save(cache_path, "WEBP")
 
-        return cache_path
-    
+    except (OSError, ValueError) as error:
+        print(f"Thumbnail failed: {image_path}")
+        print(f"Reason: {error}")
+        return None
+
+
+def generate_library_thumbnails(library_index, library_path):
+    print(f"Generating thumbnails for {len(library_index)} images...")
+
+    for item in library_index:
+        image_path = item["path"]
+        build_image_thumbnail(image_path, library_path)
+
 
 def build_gallery(library_path, indexed_files):
     gallery = []
@@ -240,6 +255,10 @@ def home():
 
     library_path = load_library_path()
     library_index = index_library(library_path) if library_path else []
+
+    # Temporary test
+    if library_path:
+        generate_library_thumbnails(library_index, library_path)
 
     library_name = None
     current_folder = load_current_folder() or ""
