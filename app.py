@@ -159,15 +159,8 @@ def build_image_thumbnail(image_path, library_path):
     if not image_path.is_file():
         return None
 
-    relative_path = image_path.relative_to(library_path)
-    cache_filename = hashlib.md5(
-        str(relative_path).encode("utf-8")
-    ).hexdigest()
-
-    cache_dir = Path("cache") / "thumbnails"
-    cache_path = cache_dir / f"{cache_filename}.webp"
-
-    cache_dir.mkdir(parents=True, exist_ok=True)
+    cache_path = get_thumbnail_cache_path(image_path, library_path)
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
 
     if cache_path.exists():
         return cache_path
@@ -193,20 +186,39 @@ def generate_library_thumbnails(library_index, library_path):
         build_image_thumbnail(image_path, library_path)
 
 
+def get_thumbnail_cache_path(image_path, library_path):
+    image_path = Path(image_path)
+    library_path = Path(library_path)
+
+    relative_path = image_path.relative_to(library_path)
+
+    cache_filename = hashlib.md5(
+        str(relative_path).encode("utf-8")
+    ).hexdigest()
+
+    cache_dir = Path("cache") / "thumbnails"
+
+    return cache_dir / f"{cache_filename}.webp"
+
+
 def build_gallery(library_path, indexed_files):
     gallery = []
 
     for item in indexed_files:
         image_path = item["path"]
-        thumbnail_path = build_image_thumbnail(image_path, library_path)
-
-        if thumbnail_path is None:
-            continue
+        thumbnail_path = get_thumbnail_cache_path(
+            image_path,
+            library_path
+        )
 
         gallery.append({
             "filename": item["filename"],
             "relative_path": item["relative_path"].as_posix(),
-            "thumbnail": thumbnail_path.name,
+            "thumbnail": (
+                thumbnail_path.name
+                if thumbnail_path.exists()
+                else None
+            ),
         })
 
     return gallery
@@ -501,7 +513,6 @@ def serve_thumbnail(filename):
 
     return "Thumbnail not found.", 404
     
-
-    
+ 
 if __name__ == '__main__':
     app.run(debug=True)

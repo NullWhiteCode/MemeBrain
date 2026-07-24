@@ -131,10 +131,14 @@
               data-lightbox="gallery"
               data-caption="{{ item.filename }}"
             >
+              {% if item.thumbnail %}
               <img
                 src="{{ url_for('serve_thumbnail', filename=item.thumbnail) }}"
                 alt="{{ item.filename }}"
               />
+              {% else %}
+              <div class="thumbnail-placeholder">Generating thumbnail...</div>
+              {% endif %}
             </a>
 
             <figcaption class="filename" title="{{ item.filename }}">

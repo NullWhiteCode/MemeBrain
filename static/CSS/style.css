@@ -229,3 +229,14 @@ body {
     grid-column: 1;
   }
 }
+
+.thumbnail-placeholder {
+  width: 100%;
+  aspect-ratio: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: #222;
+  color: #aaa;
+}
