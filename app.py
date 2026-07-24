@@ -1,280 +1,38 @@
-from flask import Flask, render_template, request, send_from_directory
+"""MemeBrain Flask application and HTTP routes."""
+
 from pathlib import Path
-import json, mimetypes, hashlib, threading
-import tkinter as tk
-from tkinter import filedialog
-from datetime import datetime
-from PIL import Image
 
-"""
-MemeBrain
+from flask import Flask, render_template, request, send_from_directory
 
-A Flask application for browsing and searching local image collections.
-"""
+from config import (
+    load_current_folder,
+    load_library_path,
+    save_current_folder,
+    save_library_path,
+)
+from folder_picker import select_folder
+from library import (
+    SUPPORTED_EXTENSIONS,
+    build_gallery,
+    get_folder_contents,
+    get_indexed_folder_items,
+    index_library,
+    search_library_index,
+    split_path_parts,
+)
+from metadata import get_image_metadata
+from thumbnails import (
+    THUMBNAIL_CACHE_DIR,
+    start_thumbnail_worker,
+)
+
 
 app = Flask(__name__)
 
-# Only display image formats currently supported by MemeBrain.
-SUPPORTED_EXTENSIONS = {
-".png",
-".jpg",
-".jpeg",
-".gif",
-".webp",
-".bmp"
-}
 
-CONFIG_FILE = Path("config.json")
-
-thumbnail_thread = None
-
-
-def get_folder_contents(folder_path):
-    """Return supported image files and immediate directories."""
-    folder_path = Path(folder_path)
-    files = []
-    directories = []
-
-    if folder_path.is_dir():
-        for child in sorted(folder_path.iterdir()):
-            if child.is_file() and child.suffix.lower() in SUPPORTED_EXTENSIONS:
-                files.append(child.name)
-            elif child.is_dir():
-                directories.append(child.name)
-
-    return files, directories
-
-
-def search_file_names(folder_path, search_pattern):
-    """Return image paths whose filenames contain the search text."""
-    files, _ = get_folder_contents(folder_path)
-    matching_files = []
-
-    for file in files:
-        if search_pattern.lower() in file.lower():
-            matching_files.append(file)
-
-    return matching_files
-
-
-def index_library(library_path):
-    indexed_files = []
-
-    for path in Path(library_path).rglob("*"):
-        if path.is_file() and path.suffix.lower() in SUPPORTED_EXTENSIONS:
-            indexed_files.append({
-                "filename": path.name,
-                "path": path,
-                "relative_path": path.relative_to(library_path),
-                "folder": path.parent.relative_to(library_path),
-            })
-
-    return indexed_files
-
-
-def save_library_path(folder_path):
-    if CONFIG_FILE.exists():
-        json_data = CONFIG_FILE.read_text(encoding="utf-8")
-        parsed_data = json.loads(json_data)
-        parsed_data["library_path"] = str(folder_path)
-        json_data = json.dumps(parsed_data, indent=2)
-
-        CONFIG_FILE.write_text(json_data, encoding="utf-8")
-
-
-def load_library_path():
-    """Load the saved library path from the JSON config file."""
-    if CONFIG_FILE.exists():
-        json_data = CONFIG_FILE.read_text(encoding="utf-8")
-        parsed_data = json.loads(json_data)
-        return parsed_data.get("library_path")
-    
-    return None
-
-
-def save_current_folder(folder_path):
-    if CONFIG_FILE.exists():
-        json_data = CONFIG_FILE.read_text(encoding="utf-8")
-        parsed_data = json.loads(json_data)
-        parsed_data["current_folder"] = str(folder_path)
-        json_data = json.dumps(parsed_data, indent=2)
-
-        CONFIG_FILE.write_text(json_data, encoding="utf-8")
-
-    
-def load_current_folder():
-    if CONFIG_FILE.exists():
-        json_data = CONFIG_FILE.read_text(encoding="utf-8")
-        parsed_data = json.loads(json_data)
-        return parsed_data.get("current_folder")
-    
-    return None
-
-
-def split_path_parts(current_folder):
-    path_parts = Path(current_folder).parts
-    cumulative_path = []
-    breadcrumbs = []
-
-    for part in path_parts:
-        cumulative_path.append(part)
-        breadcrumbs.append(
-            {
-                "display": part,
-                "link": Path(*cumulative_path).as_posix(),
-            }
-        )
-
-    return breadcrumbs
-
-
-def get_image_metadata(image_path):
-    image_path = Path(image_path)
-
-    if not image_path.is_file():
-        return None
-
-    file_stats = image_path.stat()
-
-    with Image.open(image_path) as image_stats:
-        metadata = {
-            "filename": image_path.name,
-            "extension": image_path.suffix.lower(),
-            "filesize": format_filesize(file_stats.st_size),
-            "modified": format_timestamp(file_stats.st_mtime),
-            "created": format_timestamp(file_stats.st_birthtime),
-            "mime_type": mimetypes.guess_type(str(image_path))[0] or "Unknown",
-            "dimensions": f"{image_stats.width} × {image_stats.height}",
-            "mode": image_stats.mode,
-            "animated": getattr(image_stats, "is_animated", False),
-        }
-
-    return metadata
-
-
-def build_image_thumbnail(image_path, library_path):
-    image_path = Path(image_path)
-    size = (384, 384)
-
-    if not image_path.is_file():
-        return None
-
-    cache_path = get_thumbnail_cache_path(image_path, library_path)
-    cache_path.parent.mkdir(parents=True, exist_ok=True)
-
-    if cache_path.exists():
-        return cache_path
-
-    try:
-        with Image.open(image_path) as image:
-            image.thumbnail(size)
-            image.save(cache_path, "WEBP")
-
-        return cache_path
-
-    except (OSError, ValueError) as error:
-        print(f"Thumbnail failed: {image_path}")
-        print(f"Reason: {error}")
-        return None
-
-
-def generate_library_thumbnails(library_index, library_path):
-    print(f"Generating thumbnails for {len(library_index)} images...")
-
-    for item in library_index:
-        image_path = item["path"]
-        build_image_thumbnail(image_path, library_path)
-
-
-def get_thumbnail_cache_path(image_path, library_path):
-    image_path = Path(image_path)
-    library_path = Path(library_path)
-
-    relative_path = image_path.relative_to(library_path)
-
-    cache_filename = hashlib.md5(
-        str(relative_path).encode("utf-8")
-    ).hexdigest()
-
-    cache_dir = Path("cache") / "thumbnails"
-
-    return cache_dir / f"{cache_filename}.webp"
-
-
-def build_gallery(library_path, indexed_files):
-    gallery = []
-
-    for item in indexed_files:
-        image_path = item["path"]
-        thumbnail_path = get_thumbnail_cache_path(
-            image_path,
-            library_path
-        )
-
-        gallery.append({
-            "filename": item["filename"],
-            "relative_path": item["relative_path"].as_posix(),
-            "thumbnail": (
-                thumbnail_path.name
-                if thumbnail_path.exists()
-                else None
-            ),
-        })
-
-    return gallery
-
-
-def get_indexed_folder_items(library_index, folder_path):
-    folder_items = []
-
-    for item in library_index:
-        if item["path"].parent == Path(folder_path):
-            folder_items.append(item)
-
-    return folder_items
-
-
-def search_library_index(library_index, search_pattern):
-    matches = []
-
-    for item in library_index:
-        if search_pattern.lower() in item["filename"].lower():
-            matches.append(item)
-
-    return matches
-
-
-def format_filesize(filesize):
-    for unit in ['B', 'KB', 'MB']:
-        if filesize < 1024.0:
-            return f"{filesize:.2f} {unit}"
-        filesize /= 1024.0
-    return f"{filesize:.2f} GB"
-
-
-def format_timestamp(timestamp):
-    dt = datetime.fromtimestamp(timestamp)
-    return dt.strftime("%Y-%m-%d %H:%M:%S")
-
-
-def start_thumbnail_worker(library_index, library_path):
-    global thumbnail_thread
-
-    if thumbnail_thread is not None and thumbnail_thread.is_alive():
-        return thumbnail_thread
-
-    thumbnail_thread = threading.Thread(
-        target=generate_library_thumbnails,
-        args=(library_index, library_path),
-        name="thumbnail-worker",
-        daemon=True,
-    )
-    thumbnail_thread.start()
-    return thumbnail_thread
-
-
-@app.route('/', methods=['GET', 'POST'])
+@app.route("/", methods=["GET", "POST"])
 def home():
+    """Display the current folder or filename search results."""
     folder_path = None
     search_pattern = ""
     folder_name = ""
@@ -301,32 +59,54 @@ def home():
         if folder_path.is_dir():
             files, directories = get_folder_contents(folder_path)
 
-            current_folder_items = get_indexed_folder_items(library_index, folder_path)
-
-            gallery = build_gallery(library_path, current_folder_items)
-            folder_name = folder_path.name
-
-    if request.method == "POST":
-        folder_path = Path(request.form.get("folder_path"))
-        search_pattern = request.form.get("search_pattern", "").strip()
-
-        folder_name = folder_path.name
-        files, directories = get_folder_contents(folder_path)
-
-        if search_pattern:
-            matches = search_library_index(
+            current_folder_items = get_indexed_folder_items(
                 library_index,
-                search_pattern
+                folder_path,
             )
-            gallery = build_gallery(library_path, matches)
-
-        else:
-            current_folder_items = get_indexed_folder_items(library_index, folder_path)
 
             gallery = build_gallery(
                 library_path,
-                current_folder_items
+                current_folder_items,
             )
+
+            folder_name = folder_path.name
+
+    if request.method == "POST":
+        submitted_folder = request.form.get("folder_path")
+
+        if submitted_folder:
+            folder_path = Path(submitted_folder)
+
+        search_pattern = request.form.get(
+            "search_pattern",
+            "",
+        ).strip()
+
+        if folder_path is not None:
+            folder_name = folder_path.name
+            files, directories = get_folder_contents(folder_path)
+
+            if search_pattern:
+                matches = search_library_index(
+                    library_index,
+                    search_pattern,
+                )
+
+                gallery = build_gallery(
+                    library_path,
+                    matches,
+                )
+
+            else:
+                current_folder_items = get_indexed_folder_items(
+                    library_index,
+                    folder_path,
+                )
+
+                gallery = build_gallery(
+                    library_path,
+                    current_folder_items,
+                )
 
     return render_template(
         "index.html",
@@ -346,7 +126,6 @@ def home():
 @app.route("/file/<path:filename>")
 def serve_image(filename):
     """Serve an image from the selected library."""
-
     library_path = load_library_path()
 
     if not library_path:
@@ -355,27 +134,24 @@ def serve_image(filename):
     library_path = Path(library_path)
     file_path = library_path / filename
 
-    if file_path.is_file() and file_path.suffix.lower() in SUPPORTED_EXTENSIONS:
-        return send_from_directory(library_path, filename)
+    if (
+        file_path.is_file()
+        and file_path.suffix.lower() in SUPPORTED_EXTENSIONS
+    ):
+        return send_from_directory(
+            library_path,
+            filename,
+        )
 
     return "File not found or unsupported file type.", 404
-    
 
-@app.route('/folder_browser')
+
+@app.route("/folder_browser")
 def folder_browser():
-    root = tk.Tk()
-    root.withdraw()
-    root.attributes("-topmost", True)
+    """Select a new image library and display its root folder."""
+    folder_path = select_folder()
 
-    folder_path = filedialog.askdirectory(
-        title="Select a folder to browse",
-        parent=root
-    )
-
-    root.destroy()
-
-    if folder_path == "":
-        gallery=[]
+    if not folder_path:
         return render_template(
             "index.html",
             folder_path=None,
@@ -386,133 +162,192 @@ def folder_browser():
             breadcrumbs=[],
             current_folder="",
             library_name=None,
-            gallery=gallery
+            metadata=None,
+            gallery=[],
         )
-    
-    folder_name = Path(folder_path).name
 
     save_library_path(folder_path)
     save_current_folder("")
-    breadcrumbs = []
-    metadata = None
 
     root_folder = load_library_path()
     library_index = index_library(root_folder)
-    start_thumbnail_worker(library_index, root_folder)
-    folder_items = get_indexed_folder_items(library_index, folder_path)
+
+    start_thumbnail_worker(
+        library_index,
+        root_folder,
+    )
+
+    folder_items = get_indexed_folder_items(
+        library_index,
+        folder_path,
+    )
+
     files, directories = get_folder_contents(folder_path)
-    gallery = build_gallery(root_folder, folder_items)
+
+    gallery = build_gallery(
+        root_folder,
+        folder_items,
+    )
+
     return render_template(
-        'index.html',
+        "index.html",
         folder_path=folder_path,
         files=files,
         directories=directories,
         search_pattern="",
-        folder_name=folder_name,
-        breadcrumbs=breadcrumbs,
+        folder_name=Path(folder_path).name,
+        breadcrumbs=[],
         current_folder="",
         library_name=Path(folder_path).name,
-        metadata=metadata,
-        gallery=gallery
+        metadata=None,
+        gallery=gallery,
     )
 
 
 @app.route("/path/<path:subpath>")
 def navigate_folder(subpath):
+    """Display a subfolder within the selected image library."""
     root_folder = load_library_path()
+
     if not root_folder:
         return "No library selected.", 400
-    
-    new_current_folder = subpath
-    folder_path = Path(root_folder) / new_current_folder
+
+    current_folder = subpath
+    folder_path = Path(root_folder) / current_folder
 
     if not folder_path.is_dir():
         return "Folder not found.", 404
-    
-    save_current_folder(new_current_folder)
-    breadcrumbs = split_path_parts(new_current_folder)
 
-    library_name = Path(root_folder).name
-    folder_name = folder_path.name
+    save_current_folder(current_folder)
+
     files, directories = get_folder_contents(folder_path)
     library_index = index_library(root_folder)
-    folder_items = get_indexed_folder_items(library_index, folder_path)
-    gallery = build_gallery(root_folder, folder_items)
-    metadata = None
+
+    folder_items = get_indexed_folder_items(
+        library_index,
+        folder_path,
+    )
+
+    gallery = build_gallery(
+        root_folder,
+        folder_items,
+    )
+
     return render_template(
-        'index.html',
+        "index.html",
         folder_path=folder_path,
         files=files,
         directories=directories,
         search_pattern="",
-        folder_name=folder_name,
-        breadcrumbs=breadcrumbs,
-        current_folder=new_current_folder,
-        library_name=library_name,
-        metadata=metadata,
-        gallery=gallery
+        folder_name=folder_path.name,
+        breadcrumbs=split_path_parts(current_folder),
+        current_folder=current_folder,
+        library_name=Path(root_folder).name,
+        metadata=None,
+        gallery=gallery,
     )
 
 
-@app.route('/library_root')
+@app.route("/library_root")
 def root_navigation_route():
+    """Return to the root of the selected image library."""
     root_folder = load_library_path()
-    folder_path = Path(root_folder)
+
     if not root_folder:
         return "No library selected.", 400
-    
+
+    folder_path = Path(root_folder)
+
     save_current_folder("")
-    files, directories = get_folder_contents(root_folder)
+
+    files, directories = get_folder_contents(folder_path)
     library_index = index_library(root_folder)
-    folder_items = get_indexed_folder_items(library_index, folder_path)
-    gallery = build_gallery(root_folder, folder_items)
-    metadata = None
-    
+
+    folder_items = get_indexed_folder_items(
+        library_index,
+        folder_path,
+    )
+
+    gallery = build_gallery(
+        root_folder,
+        folder_items,
+    )
+
     return render_template(
-        'index.html',
-        folder_path=root_folder,
+        "index.html",
+        folder_path=folder_path,
         files=files,
         directories=directories,
         search_pattern="",
-        folder_name=Path(root_folder).name,
+        folder_name=folder_path.name,
         breadcrumbs=[],
         current_folder="",
-        library_name=Path(root_folder).name,
-        metadata=metadata,
-        gallery=gallery
+        library_name=folder_path.name,
+        metadata=None,
+        gallery=gallery,
     )
 
 
-@app.route('/image_metadata/<path:filename>')
+@app.route("/image_metadata/<path:filename>")
 def image_metadata(filename):
+    """Display metadata for an image in the current folder."""
     root_folder = load_library_path()
+
+    if not root_folder:
+        return "No library selected.", 400
+
     current_folder = load_current_folder() or ""
     folder_path = Path(root_folder) / current_folder
     image_path = folder_path / filename
 
-    if image_path.is_file() and image_path.suffix.lower() in SUPPORTED_EXTENSIONS:
-        metadata = get_image_metadata(image_path)
-        files, directories = get_folder_contents(folder_path)
-        library_index = index_library(root_folder)
-        folder_items = get_indexed_folder_items(library_index, folder_path)
-        gallery = build_gallery(root_folder, folder_items)
+    if (
+        not image_path.is_file()
+        or image_path.suffix.lower() not in SUPPORTED_EXTENSIONS
+    ):
+        return "File not found or unsupported file type.", 404
 
-        return render_template('index.html', folder_path=folder_path, files=files, directories=directories, search_pattern="", folder_name=folder_path.name, breadcrumbs=split_path_parts(current_folder), current_folder=current_folder, library_name=Path(root_folder).name, metadata=metadata, gallery=gallery)
-    
-    return "File not found or unsupported file type.", 404
-    
+    metadata = get_image_metadata(image_path)
+    files, directories = get_folder_contents(folder_path)
+    library_index = index_library(root_folder)
+
+    folder_items = get_indexed_folder_items(
+        library_index,
+        folder_path,
+    )
+
+    gallery = build_gallery(
+        root_folder,
+        folder_items,
+    )
+
+    return render_template(
+        "index.html",
+        folder_path=folder_path,
+        files=files,
+        directories=directories,
+        search_pattern="",
+        folder_name=folder_path.name,
+        breadcrumbs=split_path_parts(current_folder),
+        current_folder=current_folder,
+        library_name=Path(root_folder).name,
+        metadata=metadata,
+        gallery=gallery,
+    )
+
 
 @app.route("/thumbnail/<path:filename>")
 def serve_thumbnail(filename):
-    cache_dir = Path("cache") / "thumbnails"
-    thumbnail_path = cache_dir / filename
+    """Serve a generated thumbnail from the local cache."""
+    thumbnail_path = THUMBNAIL_CACHE_DIR / filename
 
     if thumbnail_path.is_file():
-
-        return send_from_directory(cache_dir, filename)
+        return send_from_directory(
+            THUMBNAIL_CACHE_DIR,
+            filename,
+        )
 
     return "Thumbnail not found.", 404
-    
- 
-if __name__ == '__main__':
+
+
+if __name__ == "__main__":
     app.run(debug=True)
