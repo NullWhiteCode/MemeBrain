@@ -80,3 +80,5 @@ def start_thumbnail_worker(library_index, library_path):
 
     _thumbnail_thread.start()
     return _thumbnail_thread
+
+    
