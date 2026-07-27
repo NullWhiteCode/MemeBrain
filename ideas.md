@@ -37,3 +37,4 @@
 
 - 2010s keygen-inspired launcher (for loading models etc)
 - PSX/CRT inspired UI
+- Optional feature hidden behind a cryptographic puzzle 👀
