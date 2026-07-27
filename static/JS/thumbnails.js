@@ -14,7 +14,7 @@ async function checkThumbnail(placeholder) {
 
       setTimeout(() => {
         checkThumbnail(placeholder);
-      }, 1000);
+      }, 250);
     } else {
       console.log("✅", placeholderName, response.status, "Thumbnail exists");
 
@@ -35,5 +35,23 @@ function replacePlaceholder(placeholder) {
 }
 
 for (const placeholder of placeholders) {
-  checkThumbnail(placeholder);
+  pageObserver(placeholder);
+}
+
+function pageObserver(placeholder) {
+  const intersectionCallback = (entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        console.log("👀 Entered viewport:", entry.target.dataset.filename);
+
+        checkThumbnail(entry.target);
+        observer.unobserve(entry.target);
+
+        console.log("🛑 Unobserved:", entry.target.dataset.filename);
+      }
+    });
+  };
+
+  const observer = new IntersectionObserver(intersectionCallback);
+  observer.observe(placeholder);
 }
