@@ -18,3 +18,5 @@ Thumbs.db
 # Cache
 cache/
 
+# Database
+database/*.db
