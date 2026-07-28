@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import filedialog
 
 
-def select_folder():
+def select_folder() -> str:
     """Open a folder picker and return the selected path.
 
     Returns an empty string when the user cancels the dialog.
