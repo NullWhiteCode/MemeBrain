@@ -4,6 +4,8 @@ from pathlib import Path
 
 from flask import Flask, render_template, request, send_from_directory
 
+from index import setupDatabase, store_library_index
+
 from config import (
     load_current_folder,
     load_library_path,
@@ -171,6 +173,8 @@ def folder_browser():
 
     root_folder = load_library_path()
     library_index = index_library(root_folder)
+
+    store_library_index(library_index)
 
     start_thumbnail_worker(
         library_index,
@@ -350,6 +354,9 @@ def serve_thumbnail(filename):
         )
 
     return "Thumbnail not found.", 404
+
+
+setupDatabase()
 
 
 if __name__ == "__main__":
