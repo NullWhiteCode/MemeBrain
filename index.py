@@ -56,12 +56,60 @@ def insertFile(path):
     con.close()
 
 
+def file_changed(path, row):
+    stats = path.stat()
+    modified_time = stats.st_mtime
+    file_size = stats.st_size
+
+    if modified_time != row[2] or file_size != row[3]:
+        return True
+    return False
+
+
+def updateFile(path):
+    con = sqlite3.connect("database/memebrain.db")
+    cur = con.cursor()
+
+    stats = path.stat()
+    indexed_time = time.time()
+
+    cur.execute("""
+    UPDATE 
+        files
+
+    SET
+        modified_time = ?,
+        file_size = ?,
+        indexed_time = ?,
+        status = ?
+
+    WHERE
+        path = ?
+        """,
+        (
+            stats.st_mtime,
+            stats.st_size,
+            indexed_time,
+            "indexed",
+            str(path),
+        )
+    )
+
+    con.commit()
+    con.close()
+
+
 def store_library_index(library_index):
     for item in library_index:
         path = item["path"]
+        row = fileLookup(path)
 
-        if fileLookup(path) is None:
+        if row is None:
             insertFile(path)
+
+        else:
+            if file_changed(path, row):
+                updateFile(path)
 
 
 def index_folder(library_path):

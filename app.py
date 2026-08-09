@@ -4,7 +4,7 @@ from pathlib import Path
 
 from flask import Flask, render_template, request, send_from_directory
 
-from index import setupDatabase, store_library_index
+from index import setupDatabase, store_library_index, fileLookup
 
 from config import (
     load_current_folder,
@@ -357,7 +357,6 @@ def serve_thumbnail(filename):
 
 
 setupDatabase()
-
 
 if __name__ == "__main__":
     app.run(debug=True)
