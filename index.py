@@ -28,6 +28,84 @@ def fileLookup(path):
     return result
 
 
+def getStoredFiles():
+    con = sqlite3.connect("database/memebrain.db")
+    cur = con.cursor()
+
+    cur.execute("SELECT * FROM files")
+
+    result = cur.fetchall()
+    con.close()
+
+    return result
+
+
+def pathCompare(library_index):
+    stored_files = getStoredFiles()
+    stored_paths = []
+    current_paths = []
+
+    for row in stored_files:
+        stored_paths.append(row[1])
+
+    for item in library_index:
+        current_paths.append(str(item["path"]))
+
+    for path in stored_paths:
+        if path not in current_paths:
+            markFileMissing(path)
+
+
+def markFileMissing(path):
+    con = sqlite3.connect("database/memebrain.db")
+    cur = con.cursor()
+
+    cur.execute("""
+    UPDATE
+        files
+
+    SET
+        status = ?
+
+    WHERE
+        path = ?
+
+        """,
+        (
+            "missing",
+            str(path),
+        )
+    )
+
+    con.commit()
+    con.close()
+
+
+def markFileIndexed(path):
+    con = sqlite3.connect("database/memebrain.db")
+    cur = con.cursor()
+
+    cur.execute("""
+    UPDATE
+        files
+
+    SET
+        status = ?
+
+    WHERE
+        path = ?
+
+        """,
+        (
+            "indexed",
+            str(path),
+        )
+    )
+
+    con.commit()
+    con.close()
+
+
 def insertFile(path):
     con = sqlite3.connect("database/memebrain.db")
     cur = con.cursor()
@@ -111,6 +189,11 @@ def store_library_index(library_index):
             if file_changed(path, row):
                 updateFile(path)
 
+            if row[5] == "missing":
+                markFileIndexed(path)
+
+
+
 
 def index_folder(library_path):
     library_index = index_library(library_path)
@@ -120,8 +203,12 @@ def index_folder(library_path):
 if __name__ == "__main__":
     setupDatabase()
 
-    library = Path(r"E:\Null\Pictures\Spicy Memes")
-    index_folder(library)
+    library = Path(r"F:\User Files\Pictures\Spicy Memes")
+    library_index = index_library(library)
+
+    store_library_index(library_index)
+    pathCompare(library_index)
+
 
 
 
