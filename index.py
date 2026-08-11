@@ -1,3 +1,4 @@
+import hashlib
 import sqlite3, time
 from pathlib import Path
 
@@ -7,7 +8,7 @@ from library import index_library
 def setupDatabase():
     con = sqlite3.connect("database/memebrain.db")
     cur = con.cursor()
-    cur.execute("CREATE TABLE IF NOT EXISTS files(id INTEGER PRIMARY KEY, path TEXT UNIQUE, modified_time REAL, file_size INTEGER, indexed_time REAL, status TEXT)")
+    cur.execute("CREATE TABLE IF NOT EXISTS files(id INTEGER PRIMARY KEY, path TEXT UNIQUE, modified_time REAL, file_size INTEGER, indexed_time REAL, status TEXT, file_hash TEXT)")
 
     con.commit()
     con.close()
@@ -116,17 +117,19 @@ def insertFile(path):
     file_path = str(path)
     indexed_time = time.time()
     status = "indexed"
+    file_hash = calculate_file_hash(path)
 
     cur.execute("""
     INSERT INTO files
-        (path, modified_time, file_size, indexed_time, status)
-        VALUES (?, ?, ?, ?, ?)
+        (path, modified_time, file_size, indexed_time, status, file_hash)
+        VALUES (?, ?, ?, ?, ?, ?)
         """, (
             file_path,
             modified_time,
             file_size,
             indexed_time,
             status,
+            file_hash,
         )
         )
 
@@ -150,6 +153,7 @@ def updateFile(path):
 
     stats = path.stat()
     indexed_time = time.time()
+    file_hash = calculate_file_hash(path)
 
     cur.execute("""
     UPDATE 
@@ -159,7 +163,8 @@ def updateFile(path):
         modified_time = ?,
         file_size = ?,
         indexed_time = ?,
-        status = ?
+        status = ?,
+        file_hash = ?
 
     WHERE
         path = ?
@@ -169,6 +174,7 @@ def updateFile(path):
             stats.st_size,
             indexed_time,
             "indexed",
+            file_hash,
             str(path),
         )
     )
@@ -193,6 +199,15 @@ def store_library_index(library_index):
                 markFileIndexed(path)
 
 
+def calculate_file_hash(path):
+    
+    with path.open("rb") as file:
+        hash_result = hashlib.file_digest(
+            file, 
+            hashlib.sha256,
+        ).hexdigest()
+
+    return hash_result
 
 
 def index_folder(library_path):
@@ -208,6 +223,10 @@ if __name__ == "__main__":
 
     store_library_index(library_index)
     pathCompare(library_index)
+
+
+
+
 
 
 
