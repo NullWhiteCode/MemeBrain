@@ -210,6 +210,32 @@ def calculate_file_hash(path):
     return hash_result
 
 
+def getDuplicateGroups():
+    stored_files = getStoredFiles()
+    dict_groups = {}
+    duplicate_groups = {}
+
+    for file in stored_files:
+        file_hash = file[6]
+        file_path = file[1]
+
+        if file_hash not in dict_groups:
+            dict_groups[file_hash] = []
+
+        dict_groups[file_hash].append(file_path)
+
+        if len(dict_groups[file_hash]) > 1:
+            duplicate_groups[file_hash] = dict_groups[file_hash]
+
+    return duplicate_groups
+
+    
+
+
+
+        
+
+
 def index_folder(library_path):
     library_index = index_library(library_path)
     store_library_index(library_index)
@@ -223,6 +249,9 @@ if __name__ == "__main__":
 
     store_library_index(library_index)
     pathCompare(library_index)
+    getDuplicateGroups()
+
+    print(getDuplicateGroups())
 
 
 
