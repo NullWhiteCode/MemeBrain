@@ -24,3 +24,6 @@ cache/
 
 # Database
 database/*.db
+
+# Config
+config.json
