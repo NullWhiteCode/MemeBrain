@@ -1,8 +1,8 @@
-import hashlib
 import sqlite3, time
 
 from library import index_library
 from database import getStoredFiles, markFileMissing, markFileIndexed, fileLookup
+from hashing import calculate_file_hash
 
 
 def pathCompare(library_index):
@@ -111,17 +111,6 @@ def store_library_index(library_index):
 
             if row[5] == "missing":
                 markFileIndexed(path)
-
-
-def calculate_file_hash(path):
-    
-    with path.open("rb") as file:
-        hash_result = hashlib.file_digest(
-            file, 
-            hashlib.sha256,
-        ).hexdigest()
-
-    return hash_result
 
 
 def getDuplicateGroups():
