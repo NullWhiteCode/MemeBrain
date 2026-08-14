@@ -1,10 +1,10 @@
 """MemeBrain Flask application and HTTP routes."""
 
 from pathlib import Path
-
 from flask import Flask, render_template, request, send_from_directory
 
-from index import setupDatabase, store_library_index, fileLookup
+from index import store_library_index
+from database import setupDatabase
 
 from config import (
     load_current_folder,
