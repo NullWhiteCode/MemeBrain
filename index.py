@@ -1,6 +1,5 @@
 import hashlib
 import sqlite3, time
-from pathlib import Path
 
 from library import index_library
 
@@ -230,28 +229,10 @@ def getDuplicateGroups():
     return duplicate_groups
 
     
-
-
-
-        
-
-
 def index_folder(library_path):
     library_index = index_library(library_path)
     store_library_index(library_index)
 
-
-if __name__ == "__main__":
-    setupDatabase()
-
-    library = Path(r"F:\User Files\Pictures\Spicy Memes")
-    library_index = index_library(library)
-
-    store_library_index(library_index)
-    pathCompare(library_index)
-    getDuplicateGroups()
-
-    print(getDuplicateGroups())
 
 
 
