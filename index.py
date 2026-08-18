@@ -1,7 +1,8 @@
+from builtins import str
 import sqlite3, time
 
 from library import index_library
-from database import getStoredFiles, markFileMissing, markFileIndexed, fileLookup
+from database import getStoredFiles, markFileMissing, markFileIndexed, fileLookup, insertFile, updateFile
 from hashing import calculate_file_hash
 
 
@@ -21,34 +22,22 @@ def pathCompare(library_index):
             markFileMissing(path)
 
 
-def insertFile(path):
-    con = sqlite3.connect("database/memebrain.db")
-    cur = con.cursor()
-
+def prepare_file_data(path):
     stats = path.stat()
     modified_time = stats.st_mtime
     file_size = stats.st_size
-    file_path = str(path)
     indexed_time = time.time()
     status = "indexed"
     file_hash = calculate_file_hash(path)
 
-    cur.execute("""
-    INSERT INTO files
-        (path, modified_time, file_size, indexed_time, status, file_hash)
-        VALUES (?, ?, ?, ?, ?, ?)
-        """, (
-            file_path,
-            modified_time,
-            file_size,
-            indexed_time,
-            status,
-            file_hash,
-        )
-        )
-
-    con.commit()
-    con.close()
+    return {
+        "file_path": str(path),
+        "modified_time": modified_time,
+        "file_size": file_size,
+        "indexed_time": indexed_time,
+        "status": status,
+        "file_hash": file_hash,
+    }
 
 
 def file_changed(path, row):
@@ -61,53 +50,20 @@ def file_changed(path, row):
     return False
 
 
-def updateFile(path):
-    con = sqlite3.connect("database/memebrain.db")
-    cur = con.cursor()
-
-    stats = path.stat()
-    indexed_time = time.time()
-    file_hash = calculate_file_hash(path)
-
-    cur.execute("""
-    UPDATE 
-        files
-
-    SET
-        modified_time = ?,
-        file_size = ?,
-        indexed_time = ?,
-        status = ?,
-        file_hash = ?
-
-    WHERE
-        path = ?
-        """,
-        (
-            stats.st_mtime,
-            stats.st_size,
-            indexed_time,
-            "indexed",
-            file_hash,
-            str(path),
-        )
-    )
-
-    con.commit()
-    con.close()
-
-
 def store_library_index(library_index):
+    
     for item in library_index:
         path = item["path"]
         row = fileLookup(path)
 
         if row is None:
-            insertFile(path)
+            file_data = prepare_file_data(path)
+            insertFile(file_data)
 
         else:
             if file_changed(path, row):
-                updateFile(path)
+                file_data = prepare_file_data(path)
+                updateFile(file_data)
 
             if row[5] == "missing":
                 markFileIndexed(path)
