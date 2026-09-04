@@ -3,7 +3,7 @@
 from pathlib import Path
 from flask import Flask, render_template, request, send_from_directory
 
-from index import store_library_index
+from index import index_folder
 from database import setupDatabase
 
 from config import (
@@ -44,7 +44,7 @@ def home():
     gallery = []
 
     library_path = load_library_path()
-    library_index = index_library(library_path) if library_path else []
+    library_index = index_folder(library_path) if library_path else []
 
     if library_path:
         start_thumbnail_worker(library_index, library_path)
@@ -172,9 +172,7 @@ def folder_browser():
     save_current_folder("")
 
     root_folder = load_library_path()
-    library_index = index_library(root_folder)
-
-    store_library_index(library_index)
+    library_index = index_folder(root_folder)
 
     start_thumbnail_worker(
         library_index,

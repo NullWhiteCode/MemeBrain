@@ -91,9 +91,22 @@ def getDuplicateGroups():
     
 def index_folder(library_path):
     library_index = index_library(library_path)
+    
+    pathCompare(library_index)
+    
     store_library_index(library_index)
+    
+    return library_index
 
-
+"""
+if __name__ == "__main__":
+    library_path = load_library_path()
+    index_folder(library_path)
+    
+    files = getStoredFiles()
+    
+    print(files)
+"""
 
 
 
