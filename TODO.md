@@ -1,7 +1,7 @@
 # Next
 
-- [ ] Background thumbnail generation
-- [ ] SQLite library database
+- [x] Background thumbnail generation
+- [x] SQLite library database
 - [ ] Duplicate detection
 - [ ] OCR
 - [ ] Semantic search
