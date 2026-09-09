@@ -4,6 +4,7 @@ import sqlite3, time
 from library import index_library
 from database import getStoredFiles, markFileMissing, markFileIndexed, fileLookup, insertFile, updateFile
 from hashing import calculate_file_hash
+from config import load_library_path
 
 
 def pathCompare(library_index):
@@ -77,10 +78,14 @@ def getDuplicateGroups():
     for file in stored_files:
         file_hash = file[6]
         file_path = file[1]
+        file_status = file[5]
+        
+        if file_status != "indexed":
+            continue
 
         if file_hash not in dict_groups:
             dict_groups[file_hash] = []
-
+            
         dict_groups[file_hash].append(file_path)
 
         if len(dict_groups[file_hash]) > 1:
@@ -88,7 +93,23 @@ def getDuplicateGroups():
 
     return duplicate_groups
 
+
+def getImageDuplicates(image_path):
+    image_path = str(image_path)
+    duplicate_groups = getDuplicateGroups()
+    image_db_row = fileLookup(image_path)
+    image_hash = image_db_row[6]
+    duplicate_images = []
     
+    for hash in duplicate_groups:
+        if hash == image_hash:
+            for path in duplicate_groups[hash]:
+                if path != image_path:
+                    duplicate_images.append(path)
+            
+    return duplicate_images
+    
+ 
 def index_folder(library_path):
     library_index = index_library(library_path)
     
@@ -102,10 +123,17 @@ def index_folder(library_path):
 if __name__ == "__main__":
     library_path = load_library_path()
     index_folder(library_path)
+
+    
+    dups = getDuplicateGroups()
+    print(dups)
     
     files = getStoredFiles()
-    
     print(files)
+    
+    
+    dupe_images = getImageDuplicates(r"")
+    print(dupe_images)
 """
 
 

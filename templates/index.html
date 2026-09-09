@@ -94,29 +94,78 @@
       <div class="panel">
         <section class="metadata-panel">
           <h2>🛈 Image Details</h2>
+
           {% if metadata %}
           <dl class="metadata-list">
             <dt>Filename:</dt>
             <dd>{{ metadata.filename }}</dd>
+
             <dt>Extension:</dt>
             <dd>{{ metadata.extension }}</dd>
+
             <dt>Filesize:</dt>
             <dd>{{ metadata.filesize }}</dd>
+
             <dt>Modified:</dt>
             <dd>{{ metadata.modified }}</dd>
+
             <dt>Created:</dt>
             <dd>{{ metadata.created }}</dd>
+
             <dt>Dimensions:</dt>
             <dd>{{ metadata.dimensions }}</dd>
+
             <dt>MIME Type:</dt>
             <dd>{{ metadata.mime_type }}</dd>
+
             <dt>Mode:</dt>
             <dd>{{ metadata.mode }}</dd>
+
             <dt>Animated?</dt>
             <dd>{{ metadata.animated }}</dd>
+
+            <dt>Duplicates:</dt>
+            <dd>{{ metadata.duplicates | length }}</dd>
           </dl>
           {% endif %}
         </section>
+
+        {% if metadata and duplicate_preview %}
+        <section class="duplicates-panel">
+          <h2>👯 Duplicates</h2>
+
+          <div class="duplicate-grid">
+            {% for item in duplicate_preview %}
+            <figure class="image-card">
+              <a
+                href="{{ url_for('serve_image', filename=item.relative_path) }}"
+                data-lightbox="duplicate_preview"
+                data-caption="{{ item.filename }}"
+              >
+                {% if item.thumbnail_exists %}
+                <img
+                  src="{{ url_for('serve_thumbnail', filename=item.thumbnail) }}"
+                  alt="{{ item.filename }}"
+                />
+                {% else %}
+                <div
+                  class="thumbnail-placeholder"
+                  data-url="{{ url_for('serve_thumbnail', filename=item.thumbnail) }}"
+                  data-filename="{{ item.filename }}"
+                >
+                  Generating thumbnail...
+                </div>
+                {% endif %}
+              </a>
+
+              <figcaption class="filename" title="{{ item.filename }}">
+                {{ item.filename }}
+              </figcaption>
+            </figure>
+            {% endfor %}
+          </div>
+        </section>
+        {% endif %}
       </div>
 
       <section>

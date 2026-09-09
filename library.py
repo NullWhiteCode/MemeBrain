@@ -109,3 +109,26 @@ def build_gallery(library_path, indexed_files):
         )
 
     return gallery
+
+
+def build_duplicate_preview(duplicate_images, library_path):
+    duplicate_preview = []
+    
+    for item in duplicate_images:
+        path = Path(item)
+        
+        thumbnail_path = get_thumbnail_cache_path(
+            path,
+            library_path,
+        )
+        
+        duplicate_preview.append(
+            {
+                "filename": path.name,
+                "relative_path": path.relative_to(library_path).as_posix(),
+                "thumbnail": thumbnail_path.name,
+                "thumbnail_exists": thumbnail_path.exists()
+            }
+        )
+        
+    return duplicate_preview

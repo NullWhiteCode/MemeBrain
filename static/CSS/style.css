@@ -55,6 +55,10 @@ body {
   grid-area: search;
 }
 
+.duplicates-panel {
+  grid-column: span 2;
+}
+
 /* Folder information */
 
 .folder-path {
@@ -239,4 +243,17 @@ body {
 
   background: #222;
   color: #aaa;
+}
+
+/* Duplicate gallery */
+
+.duplicate-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 180px));
+  gap: 1rem;
+  align-items: start;
+}
+
+.duplicate-grid .image-card img {
+  height: 160px;
 }

@@ -3,6 +3,7 @@
 import mimetypes
 from datetime import datetime
 from pathlib import Path
+from index import getImageDuplicates
 
 from PIL import Image
 
@@ -30,6 +31,7 @@ def get_image_metadata(image_path):
             "dimensions": f"{image.width} × {image.height}",
             "mode": image.mode,
             "animated": getattr(image, "is_animated", False),
+            "duplicates": getImageDuplicates(image_path),
         }
 
 

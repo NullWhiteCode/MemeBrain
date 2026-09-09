@@ -21,6 +21,7 @@ from library import (
     index_library,
     search_library_index,
     split_path_parts,
+    build_duplicate_preview,
 )
 from metadata import get_image_metadata
 from thumbnails import (
@@ -308,6 +309,7 @@ def image_metadata(filename):
         return "File not found or unsupported file type.", 404
 
     metadata = get_image_metadata(image_path)
+    duplicate_preview = build_duplicate_preview(metadata["duplicates"], root_folder)
 
     current_folder = load_current_folder() or ""
     folder_path = root_folder / current_folder
@@ -337,6 +339,7 @@ def image_metadata(filename):
         library_name=root_folder.name,
         metadata=metadata,
         gallery=gallery,
+        duplicate_preview=duplicate_preview,
     )
 
 
