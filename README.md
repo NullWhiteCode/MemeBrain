@@ -55,6 +55,7 @@ Memes/
 ### Search
 
 - ✅ Instant filename search
+- ✅ Exact duplicate detection
 
 ### Interface
 
@@ -68,7 +69,6 @@ Memes/
 - Semantic image search
 - Reverse image search
 - OCR
-- Duplicate detection UI
 - Similarity ranking
 
 ### Organisation
