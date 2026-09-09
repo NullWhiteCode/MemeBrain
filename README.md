@@ -34,22 +34,30 @@ Memes/
 ## Current Features
 
 ### Library
+
 - ✅ Recursive folder scanning
 - ✅ Persistent library selection
+- ✅ Persistent SQLite library index
+- ✅ Automatic library synchronisation
+- ✅ File change and missing-file tracking
 - ✅ Breadcrumb navigation
 - ✅ Folder navigation
 
 ### Media
+
 - ✅ Thumbnail gallery
 - ✅ Cached thumbnail generation
+- ✅ Background thumbnail generation
 - ✅ Local image viewer
 - ✅ Image metadata viewer
 - ✅ Lightbox image preview
 
 ### Search
+
 - ✅ Instant filename search
 
 ### Interface
+
 - ✅ Responsive web interface
 - ✅ Native folder picker
 
@@ -60,7 +68,7 @@ Memes/
 - Semantic image search
 - Reverse image search
 - OCR
-- Duplicate detection
+- Duplicate detection UI
 - Similarity ranking
 
 ### Organisation
