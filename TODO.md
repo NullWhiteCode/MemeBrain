@@ -2,8 +2,8 @@
 
 - [x] Background thumbnail generation
 - [x] SQLite library database
-- [ ] Duplicate detection
-- [ ] OCR
+- [x] Duplicate detection
+- [x] OCR
 - [ ] Semantic search
 - [ ] Reverse image search
 

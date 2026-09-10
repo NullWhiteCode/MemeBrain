@@ -5,6 +5,7 @@ from flask import Flask, render_template, request, send_from_directory
 
 from index import index_folder
 from database import setupDatabase
+from ocr import createEngine
 
 from config import (
     load_current_folder,
@@ -32,6 +33,7 @@ from thumbnails import (
 
 app = Flask(__name__)
 
+engine = createEngine()
 
 @app.route("/", methods=["GET", "POST"])
 def home():
@@ -45,7 +47,7 @@ def home():
     gallery = []
 
     library_path = load_library_path()
-    library_index = index_folder(library_path) if library_path else []
+    library_index = index_folder(library_path, engine) if library_path else []
 
     if library_path:
         start_thumbnail_worker(library_index, library_path)
@@ -173,7 +175,7 @@ def folder_browser():
     save_current_folder("")
 
     root_folder = load_library_path()
-    library_index = index_folder(root_folder)
+    library_index = index_folder(root_folder, engine)
 
     start_thumbnail_worker(
         library_index,

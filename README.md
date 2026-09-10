@@ -29,7 +29,7 @@ Memes/
 - 🚫 No telemetry
 - ☁️ No hidden uploads
 - 🔍 Everything should be inspectable
-- 😑 Content agnostic *(yes, **those** folders work too...)*
+- 😑 Content agnostic _(yes, **those** folders work too...)_
 
 ## Current Features
 
@@ -56,6 +56,7 @@ Memes/
 
 - ✅ Instant filename search
 - ✅ Exact duplicate detection
+- ✅ OCR
 
 ### Interface
 
@@ -68,7 +69,6 @@ Memes/
 
 - Semantic image search
 - Reverse image search
-- OCR
 - Similarity ranking
 
 ### Organisation

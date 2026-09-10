@@ -1,10 +1,13 @@
-from builtins import str
-import sqlite3, time
+import time
 
 from library import index_library
-from database import getStoredFiles, markFileMissing, markFileIndexed, fileLookup, insertFile, updateFile
+from database import getStoredFiles, insertOCRData, markFileMissing, markFileIndexed, fileLookup, insertFile, ocrRowLookup, updateFile
 from hashing import calculate_file_hash
-from config import load_library_path
+from importlib.metadata import version
+
+from ocr import extractText
+
+
 
 
 def pathCompare(library_index):
@@ -39,6 +42,21 @@ def prepare_file_data(path):
         "status": status,
         "file_hash": file_hash,
     }
+    
+    
+def prepare_ocr_data(image_path, extracted_text):
+    file = fileLookup(image_path)
+    file_id = file[0]
+    ocr_time = time.time()
+    rapidocr_version = version("rapidocr")
+    
+    return {
+        "file_id": file_id,
+        "text": extracted_text,
+        "ocr_time": ocr_time,
+        "engine": "RapidOCR",
+        "engine_version": rapidocr_version,
+    }
 
 
 def file_changed(path, row):
@@ -51,20 +69,32 @@ def file_changed(path, row):
     return False
 
 
-def store_library_index(library_index):
+def store_library_index(library_index, engine):
     
     for item in library_index:
         path = item["path"]
         row = fileLookup(path)
-
+        
         if row is None:
             file_data = prepare_file_data(path)
             insertFile(file_data)
+            extracted_text = extractText(engine, path)
+            ocr_data = prepare_ocr_data(path, extracted_text)
+            insertOCRData(ocr_data)
 
         else:
             if file_changed(path, row):
                 file_data = prepare_file_data(path)
                 updateFile(file_data)
+                extracted_text = extractText(engine, path)
+                ocr_data = prepare_ocr_data(path, extracted_text)
+                insertOCRData(ocr_data)
+                
+            else:
+                if ocrRowLookup(path) is None:
+                    extracted_text = extractText(engine, path)
+                    ocr_data = prepare_ocr_data(path, extracted_text)
+                    insertOCRData(ocr_data)
 
             if row[5] == "missing":
                 markFileIndexed(path)
@@ -110,31 +140,16 @@ def getImageDuplicates(image_path):
     return duplicate_images
     
  
-def index_folder(library_path):
+def index_folder(library_path, engine):
     library_index = index_library(library_path)
     
     pathCompare(library_index)
     
-    store_library_index(library_index)
+    store_library_index(library_index, engine)
     
     return library_index
 
-"""
-if __name__ == "__main__":
-    library_path = load_library_path()
-    index_folder(library_path)
 
-    
-    dups = getDuplicateGroups()
-    print(dups)
-    
-    files = getStoredFiles()
-    print(files)
-    
-    
-    dupe_images = getImageDuplicates(r"")
-    print(dupe_images)
-"""
 
 
 
