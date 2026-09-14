@@ -37,7 +37,7 @@ engine = createEngine()
 
 @app.route("/", methods=["GET", "POST"])
 def home():
-    """Display the current folder or filename search results."""
+    """Display the current folder or search results."""
     folder_path = None
     search_pattern = ""
     folder_name = ""
