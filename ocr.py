@@ -18,3 +18,10 @@ def extractText(engine, image_path):
     
     return extracted_text
     
+
+if __name__ == "__main__":
+    image_path = r"F:\User Files\Pictures\Spicy Memes\gjvBTUd.jpg"
+    engine = createEngine()
+    
+    extracted_text = extractText(engine, image_path)
+    print(extracted_text)

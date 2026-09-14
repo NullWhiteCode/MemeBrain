@@ -1,6 +1,7 @@
 """MemeBrain Flask application and HTTP routes."""
 
 from pathlib import Path
+from search import search
 from flask import Flask, render_template, request, send_from_directory
 
 from index import index_folder
@@ -20,7 +21,6 @@ from library import (
     get_folder_contents,
     get_indexed_folder_items,
     index_library,
-    search_library_index,
     split_path_parts,
     build_duplicate_preview,
 )
@@ -92,10 +92,7 @@ def home():
             files, directories = get_folder_contents(folder_path)
 
             if search_pattern:
-                matches = search_library_index(
-                    library_index,
-                    search_pattern,
-                )
+                matches = search(library_index, search_pattern)
 
                 gallery = build_gallery(
                     library_path,

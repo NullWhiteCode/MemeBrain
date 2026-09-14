@@ -224,7 +224,55 @@ def updateFile(file_data):
     con.close()
 
 
-
+def searchOCR(search_pattern):
+    search_pattern = "%" + search_pattern + "%"
+    structured_results = []
+    con = setupConnection()
+    cur = con.cursor()
     
+    cur.execute(""" 
+    SELECT file_id 
+    FROM ocr
+    WHERE ocr.text LIKE ?    
+        """,
+        (
+            search_pattern,
+        )
+    )
 
-        
+    results = cur.fetchall()
+    con.close()
+    
+    for row in results:
+        structured_results.append(row[0])
+    
+    return structured_results
+
+
+def getStoredPath(file_id):
+    con = setupConnection()
+    cur = con.cursor()
+    
+    cur.execute(""" 
+        SELECT path 
+        FROM files
+        WHERE id = ?    
+            """,
+            (
+                file_id,
+            )
+        )
+    
+    result = cur.fetchone()
+    con.close()
+    
+    if result is not None:
+        path = result[0]
+        return path
+    
+    else:
+        return None
+
+
+if __name__ == "__main__":
+    print(getStoredPath(999999))
