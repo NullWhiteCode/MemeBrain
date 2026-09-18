@@ -59,6 +59,17 @@ def get_indexed_folder_items(library_index, folder_path):
         for item in library_index
         if item["path"].parent == folder_path
     ]
+    
+    
+def get_indexed_subtree_items(library_index, folder_path):
+    """Return indexed images located directly inside the selected folder and descendant subfolders."""
+    folder_path = Path(folder_path)
+    
+    return[
+        item
+        for item in library_index
+        if item["path"].is_relative_to(folder_path)
+    ]
 
 
 def search_library_index(library_index, search_pattern):

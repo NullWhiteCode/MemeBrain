@@ -23,6 +23,7 @@ from library import (
     index_library,
     split_path_parts,
     build_duplicate_preview,
+    get_indexed_subtree_items,
 )
 from metadata import get_image_metadata
 from thumbnails import (
@@ -92,7 +93,10 @@ def home():
             files, directories = get_folder_contents(folder_path)
 
             if search_pattern:
-                matches = search(library_index, search_pattern)
+                matches = search(
+                    get_indexed_subtree_items(library_index, folder_path),
+                    search_pattern,
+                )
 
                 gallery = build_gallery(
                     library_path,
