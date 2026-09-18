@@ -65,8 +65,8 @@
           </form>
 
           <p>
-            {{ gallery|length }} images found. {{ directories|length }}
-            directories found.
+            {{ gallery|length }} images found. {% if not search_pattern %} {{
+            directories|length }} directories found. {% endif %}
           </p>
         </section>
 
