@@ -45,7 +45,7 @@
         </section>
 
         <section class="search-panel">
-          <h2><b>🔍 Search</b></h2>
+          <h2><b>🔍 OmniSearch</b></h2>
           <form method="POST" action="{{ url_for('home') }}" class="search-bar">
             <input
               type="hidden"
@@ -58,10 +58,10 @@
               id="search_pattern"
               name="search_pattern"
               value="{{ search_pattern or '' }}"
-              placeholder="Search filenames..."
+              placeholder="Search filenames and image text..."
             />
 
-            <button type="submit">Search</button>
+            <button class="search-button" type="submit">Search</button>
           </form>
 
           <p>
@@ -217,5 +217,6 @@
     </main>
     <script src="https://cdn.jsdelivr.net/npm/lightbox3@1/dist/lightbox3.min.js"></script>
     <script src="{{ url_for('static', filename='JS/thumbnails.js') }}"></script>
+    <script src="{{ url_for('static', filename='JS/omnisearch.js') }}"></script>
   </body>
 </html>
