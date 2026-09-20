@@ -1,12 +1,9 @@
 import time
 
 from library import index_library
-from database import getStoredFiles, insertOCRData, markFileMissing, markFileIndexed, fileLookup, insertFile, ocrRowLookup, updateFile
+from database import deleteOCRRow, getStoredFiles, markFileMissing, markFileIndexed, fileLookup, insertFile, updateFile
 from hashing import calculate_file_hash
 from importlib.metadata import version
-
-from ocr import extractText
-
 
 
 
@@ -69,7 +66,7 @@ def file_changed(path, row):
     return False
 
 
-def store_library_index(library_index, engine):
+def store_library_index(library_index):
     
     for item in library_index:
         path = item["path"]
@@ -78,26 +75,15 @@ def store_library_index(library_index, engine):
         if row is None:
             file_data = prepare_file_data(path)
             insertFile(file_data)
-            extracted_text = extractText(engine, path)
-            ocr_data = prepare_ocr_data(path, extracted_text)
-            insertOCRData(ocr_data)
 
         else:
             if file_changed(path, row):
                 file_data = prepare_file_data(path)
                 updateFile(file_data)
-                extracted_text = extractText(engine, path)
-                ocr_data = prepare_ocr_data(path, extracted_text)
-                insertOCRData(ocr_data)
-                
-            else:
-                if ocrRowLookup(path) is None:
-                    extracted_text = extractText(engine, path)
-                    ocr_data = prepare_ocr_data(path, extracted_text)
-                    insertOCRData(ocr_data)
-
+                deleteOCRRow(row[0])
+            
             if row[5] == "missing":
-                markFileIndexed(path)
+                 markFileIndexed(path)
 
 
 def getDuplicateGroups():
@@ -140,12 +126,12 @@ def getImageDuplicates(image_path):
     return duplicate_images
     
  
-def index_folder(library_path, engine):
+def index_folder(library_path):
     library_index = index_library(library_path)
     
     pathCompare(library_index)
     
-    store_library_index(library_index, engine)
+    store_library_index(library_index)
     
     return library_index
 

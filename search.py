@@ -1,8 +1,6 @@
-from config import load_library_path
 from database import getStoredPath, searchOCR
-from index import index_folder
 from library import search_library_index
-from ocr import createEngine
+
 
 
 def search(library_index, search_pattern):
@@ -24,14 +22,3 @@ def search(library_index, search_pattern):
         return matches
                      
             
-        
-            
-    
-if __name__ == "__main__":
-    engine = createEngine()
-    library_path = load_library_path()
-    library_index = index_folder(library_path, engine)
-
-    print(search(library_index, "福"))
-    print(search(library_index, "福"))
-    print(search(library_index, "福"))

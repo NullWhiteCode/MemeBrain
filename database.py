@@ -62,8 +62,26 @@ def ocrRowLookup(image_path):
     con.close()
     
     return result
-    
 
+
+def deleteOCRRow(file_id):
+    con = setupConnection()
+    cur = con.cursor()
+    
+    cur.execute("""
+        DELETE FROM ocr
+        
+        WHERE file_id = ?        
+    """,
+        (
+            file_id,
+        )
+    )
+    
+    con.commit()
+    con.close()
+    
+    
 def fileLookup(path):
     con = setupConnection()
     cur = con.cursor()
@@ -274,5 +292,3 @@ def getStoredPath(file_id):
         return None
 
 
-if __name__ == "__main__":
-    print(getStoredPath(999999))
