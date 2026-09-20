@@ -6,7 +6,7 @@ from flask import Flask, render_template, request, send_from_directory
 
 from index import index_folder
 from database import setupDatabase
-from ocr import createEngine
+from ocr import startOCRWorker
 
 from config import (
     load_current_folder,
@@ -34,7 +34,6 @@ from thumbnails import (
 
 app = Flask(__name__)
 
-engine = createEngine()
 
 @app.route("/", methods=["GET", "POST"])
 def home():
@@ -52,6 +51,7 @@ def home():
 
     if library_path:
         start_thumbnail_worker(library_index, library_path)
+        startOCRWorker()
 
     library_name = None
     current_folder = load_current_folder() or ""
@@ -182,6 +182,8 @@ def folder_browser():
         library_index,
         root_folder,
     )
+    
+    startOCRWorker()
 
     folder_items = get_indexed_folder_items(
         library_index,

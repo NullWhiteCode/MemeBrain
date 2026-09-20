@@ -267,6 +267,28 @@ def searchOCR(search_pattern):
     return structured_results
 
 
+def getPendingOCR():
+    con = setupConnection()
+    cur = con.cursor()
+    
+    cur.execute("""
+    SELECT files.id, files.path
+    FROM files
+    LEFT JOIN ocr
+        ON files.id = ocr.file_id
+    WHERE ocr.file_id IS NULL AND files.status = ?
+        """,
+        (
+            "indexed",
+        ) 
+    )
+    
+    results = cur.fetchall()
+    con.close()
+    
+    return results
+
+
 def getStoredPath(file_id):
     con = setupConnection()
     cur = con.cursor()
@@ -290,5 +312,6 @@ def getStoredPath(file_id):
     
     else:
         return None
+
 
 

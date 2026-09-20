@@ -3,7 +3,6 @@ import time
 from library import index_library
 from database import deleteOCRRow, getStoredFiles, markFileMissing, markFileIndexed, fileLookup, insertFile, updateFile
 from hashing import calculate_file_hash
-from importlib.metadata import version
 
 
 
@@ -38,21 +37,6 @@ def prepare_file_data(path):
         "indexed_time": indexed_time,
         "status": status,
         "file_hash": file_hash,
-    }
-    
-    
-def prepare_ocr_data(image_path, extracted_text):
-    file = fileLookup(image_path)
-    file_id = file[0]
-    ocr_time = time.time()
-    rapidocr_version = version("rapidocr")
-    
-    return {
-        "file_id": file_id,
-        "text": extracted_text,
-        "ocr_time": ocr_time,
-        "engine": "RapidOCR",
-        "engine_version": rapidocr_version,
     }
 
 
