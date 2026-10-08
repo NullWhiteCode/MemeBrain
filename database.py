@@ -26,6 +26,7 @@ def setupDatabase():
     con.close()
     
     setupOCRDatabase()
+    setupCaptionDatabase()
     
     
 def setupOCRDatabase():
@@ -39,6 +40,23 @@ def setupOCRDatabase():
             ocr_time REAL,
             engine TEXT,
             engine_version TEXT,
+            FOREIGN KEY (file_id) REFERENCES files(id)
+        )
+    """)
+
+    con.commit()
+    con.close()
+    
+    
+def setupCaptionDatabase():
+    con = setupConnection()
+    cur = con.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS captions (
+            id INTEGER PRIMARY KEY,
+            file_id INTEGER NOT NULL UNIQUE,
+            caption TEXT NOT NULL,
+            model_name TEXT NOT NULL,
             FOREIGN KEY (file_id) REFERENCES files(id)
         )
     """)
@@ -209,6 +227,45 @@ def insertOCRData(ocr_data):
     con.commit()
     con.close()
     
+    
+def insertCaptionData(caption_data):
+    con = setupConnection()
+    cur = con.cursor()
+    
+    cur.execute("""
+    INSERT INTO captions
+        (file_id, caption, model_name)
+        
+    VALUES (?, ?, ?)
+    
+    ON CONFLICT(file_id) DO UPDATE SET
+        caption = excluded.caption,
+        model_name = excluded.model_name
+
+        """, (
+            caption_data["file_id"],
+            caption_data["caption"],
+            caption_data["model_name"]
+        )
+    )
+    
+    con.commit()
+    con.close()
+    
+    
+def getCaptionData(file_id):
+    con = setupConnection()
+    cur = con.cursor()
+
+    cur.execute("SELECT caption FROM captions WHERE file_id = ?", 
+                (file_id,)
+                )
+
+    result = cur.fetchone()
+    con.close()
+
+    return result
+    
 
 def updateFile(file_data):
     con = setupConnection()
@@ -312,6 +369,3 @@ def getStoredPath(file_id):
     
     else:
         return None
-
-
-
