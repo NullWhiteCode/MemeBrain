@@ -257,3 +257,25 @@ body {
 .duplicate-grid .image-card img {
   height: 160px;
 }
+
+/* Captions panel */
+
+.captions-panel {
+  padding: 0.5rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid #304050;
+}
+
+.panel > .captions-panel {
+    background: #5ea9eb;
+}
+
+.captions-panel progress {
+    width: 100%;
+    height: 2.5rem;
+}
+
+.captions-panel .generate-caption-button {
+    width: 25%;
+    height: 2.5rem;
+}

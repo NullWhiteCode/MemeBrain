@@ -1,0 +1,86 @@
+GIF IMAGE CAPTIONING: QWEN3-VL AND REPRESENTATIVE FRAME EXTRACTION
+
+Recorded: 12 October 2026 (Europe/London)
+Baseline: ea37981, 8 October 2026, local image captioning with SQLite persistence.
+
+EVIDENCE STANDARD
+This record describes inspected working-tree source, not a claim that all of it
+is committed or released. Previously recorded synthetic/automated checks are
+preserved below; they were not rerun for this documentation update.
+Manual integration results are user-reported. Work did not independently witness
+or reproduce those tests. No private collection files, database rows, transcripts
+or search terms are reproduced. No application code, commits or pushes were made.
+Source hashes identify the implementation inspected for this update.
+
+PURPOSE AND IMPLEMENTATION
+The current implementation adapts GIF input to the image-captioning path by
+choosing one frame. image_processing.py:extractGifFrame opens the image using
+Pillow in a context manager, seeks to n_frames // 2, converts to RGB, and returns
+the converted image. This is a frame-index midpoint heuristic; it does not
+analyse which frame is most representative or account for frame durations.
+
+caption.py:generateCaption checks the lowercased suffix. GIF input is supplied
+to the processor as an image object; other input uses a path in the URL field.
+loadCaptionModel selects a local Qwen3-VL-4B-Instruct model and matching
+AutoProcessor, with automatic dtype and device mapping. generateCaption moves
+inputs to CUDA, removes token_type_ids, uses torch.inference_mode and requests
+at most 128 new tokens. It removes input tokens before decoding the response.
+The prompt requests a concise visual description and asks not to transcribe
+visible text. That is an instruction to the model, not a verified guarantee.
+
+prepare_caption_data associates the caption with a files row and model name.
+database.py:insertCaptionData uses a parameterised SQLite upsert keyed by unique
+file_id. The captions schema requires a file reference, caption and model name.
+getPendingCaptions selects indexed files without a caption row.
+processPendingCaptions loads the model once and handles at most five entries
+by default from a pending snapshot. Per-file exceptions are logged and processing
+continues; finally releases model/processor references and clears the CUDA cache.
+startCaptionWorker uses a daemon thread and checks whether the existing thread
+is alive. This is process-local coordination, not a verified concurrency lock.
+
+PREVIOUSLY RECORDED HISTORY AND ATTRIBUTION
+ea37981 introduced committed captioning/persistence. Its caption function used
+an image URL and did not contain the current GIF branch. At inspection, caption.py
+and database.py had local edits; image_processing.py was untracked. The GIF
+adaptation is evidenced by current source, not attributed to that commit.
+
+PREVIOUSLY RECORDED SYNTHETIC/AUTOMATED VERIFICATION: PASS
+On the recorded date, actual extractGifFrame code processed a synthetic
+three-frame GIF and selected index 1 with RGB output. A synthetic single-frame
+GIF also returned usable RGB pixels after the file context had closed.
+The actual generateCaption function was extracted with Python AST and executed
+with model, processor and torch doubles: uppercase GIF suffix, image-object
+handoff, token_type_ids removal, 128-token limit and output trimming passed.
+Actual database functions, with setupConnection redirected to a disposable
+SQLite file, passed caption insertion and replacement without duplicate rows.
+These are isolated code checks, not real Qwen inference or a full app test.
+
+USER-REPORTED MANUAL INTEGRATION VERIFICATION
+The user successfully generated a Qwen3-VL caption from a representative GIF
+frame, persisted and retrieved the caption in SQLite, and used OmniSearch to
+retrieve the item. This is a reported real-model integration result, separate
+from the isolated checks above; it is not a broad caption-quality assessment.
+Source inspection confirms getCaptionData reads stored captions and search.py
+combines caption and OCR database matches with library search results.
+
+LIMITATIONS AND UNVERIFIED CASES
+Work did not load model weights, execute GPU inference or assess caption quality.
+The user-reported success supports the tested local setup; portability and other
+CUDA/model configurations remain unverified. Dependency files do not fully
+declare the torch/transformers caption stack.
+Multi-frame temporal coverage, corrupt GIFs, transparency/disposal behaviour,
+large files, model-load failure, worker races and memory recovery were not tested.
+Model loading occurs before the worker's try/finally. Caption failures can remain
+pending. A missing file lookup returns None, which insertion does not accept.
+The worker does not automatically drain the entire queue in one five-item run.
+The application error log can include real paths; this evidence omits such logs.
+
+SOURCE SNAPSHOT (SHA-256)
+image_processing.py
+  8fb1f60ece0ed9b8e7698c1a1171eccbb16ea07adbd4341d62f01beb53fa1a57
+caption.py
+  55f87b4a7c26421fb5bb899ab1070dc39368f86736061a827cb2823733978172
+database.py
+  9ea5493325c48f488eab3e04809670f4c3c7ea4032bc11396d6e85e88f77f482
+search.py
+  abf079695497348a44e1693bc26fb13844f8e7e0b68d01eb66cc384b29a865d1

@@ -70,6 +70,18 @@
           </p>
         </section>
 
+        <section class="captions-panel">
+          <h2 id="caption"></h2><br />
+          <progress id="progress" max="100" value="0"></progress><br />
+          <p id="info"></p>
+
+          <form method="POST" action="{{ url_for('generate_captions') }}">
+            <button class="generate-caption-button" type="submit">
+              Generate
+            </button>
+          </form>
+        </section>
+
         <section class="directories-panel">
           <!-- Directory list -->
           <h2><b>📂 Directories</b></h2>
@@ -218,5 +230,6 @@
     <script src="https://cdn.jsdelivr.net/npm/lightbox3@1/dist/lightbox3.min.js"></script>
     <script src="{{ url_for('static', filename='JS/thumbnails.js') }}"></script>
     <script src="{{ url_for('static', filename='JS/omnisearch.js') }}"></script>
+    <script src="{{ url_for('static', filename='JS/captions.js') }}"></script>
   </body>
 </html>

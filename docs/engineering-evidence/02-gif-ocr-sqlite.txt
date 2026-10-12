@@ -1,0 +1,88 @@
+GIF OCR: RAPIDOCR AND SQLITE PERSISTENCE
+
+Recorded: 12 October 2026 (Europe/London)
+Baseline: ea37981, 8 October 2026, local image captioning with SQLite persistence.
+
+EVIDENCE STANDARD
+This record describes inspected working-tree source, not a claim that all of it
+is committed or released. Previously recorded synthetic/automated checks are
+preserved below; they were not rerun for this documentation update.
+Manual integration results are user-reported. Work did not independently witness
+or reproduce those tests. No private collection files, database rows, transcripts
+or search terms are reproduced. No application code, commits or pushes were made.
+Source hashes identify the implementation inspected for this update.
+
+PURPOSE AND IMPLEMENTATION
+ocr.py:extractText checks the lowercased input suffix. For GIFs, it calls the
+shared extractGifFrame helper and converts the RGB Pillow image to a NumPy
+array for the OCR engine. Other inputs pass their path to the engine.
+The helper chooses n_frames // 2, so OCR examines one midpoint frame, not every
+frame or the temporal midpoint. createEngine constructs RapidOCR().
+extractText joins result.txts with spaces, or returns an empty string when
+result.txts is None. Recognition boxes and confidence values are not persisted
+by this path.
+
+prepare_ocr_data looks up the indexed file ID and records text, time.time(),
+engine name RapidOCR and the installed distribution version. database.py creates
+an ocr table with a unique file_id and foreign-key relationship to files.
+insertOCRData parameterises its values and updates text, timestamp and engine
+metadata on file_id conflict. setupConnection enables foreign-key enforcement.
+getPendingOCR selects indexed files with no OCR row. An empty-text OCR row counts
+as processed, because pending selection checks row existence rather than text.
+
+processPendingOCR takes a pending snapshot, constructs one engine and processes
+the snapshot sequentially. startOCRWorker uses a daemon thread and an is_alive
+check. app.py starts OCR from the home route when a library is configured and
+from the folder-selection flow. Worker completion is not checked here at runtime.
+
+PREVIOUSLY RECORDED HISTORY AND ATTRIBUTION
+22fb8f7 (10 September 2026) is titled 'feat: add OCR indexing and persistence'.
+fe01055 (20 September 2026) is titled 'feat: add background OCR worker'. Its
+inspected ocr.py passes the input path directly to the engine, without a GIF
+adapter. At the earlier inspection, ocr.py had local edits and
+image_processing.py was untracked;
+the GIF adapter is working-tree evidence rather than a claim about those commits.
+requirements.txt pins rapidocr==3.9.2 and lists onnxruntime; installed engine
+version was not independently checked; Work did not execute the real engine.
+
+PREVIOUSLY RECORDED SYNTHETIC/AUTOMATED VERIFICATION: PASS
+Actual shared helper: synthetic three-frame midpoint and single-frame RGB checks.
+Actual extractText, extracted with Python AST: an engine double received an
+8 x 8 x 3 NumPy array for a synthetic uppercase-suffix GIF. Synthetic recognition
+fragments were joined correctly; a None result produced an empty string.
+Actual SQLite schema, insertOCRData and getPendingOCR functions ran against a
+disposable database. A second insert replaced the existing OCR row; empty text
+persisted and its file was excluded from pending OCR. Missing-status files were
+excluded. No production database was opened or modified.
+
+USER-REPORTED MANUAL INTEGRATION VERIFICATION
+The user tested a GIF containing text, a GIF without text and a non-GIF input.
+The no-text GIF produced spurious numeric text, a recognition false positive.
+The user confirmed GIF OCR persistence in SQLite and retrieval through
+OmniSearch. Inputs and outputs are described generically; collection filenames,
+transcripts and search terms are omitted. These reports establish tested
+integration paths, not general recognition accuracy or a clean no-text result.
+Source inspection confirms search.py includes stored OCR matches in search.
+
+LIMITATIONS AND UNVERIFIED CASES
+The automated checks cover adapter and persistence plumbing in isolation.
+Real-engine integration is user-reported above; recognition accuracy remains
+limited, including the observed false positive on a no-text GIF.
+Changing text across frames, animated disposal/transparency, malformed files,
+multilingual recognition and confidence-based filtering remain unverified.
+prepare_ocr_data assumes fileLookup returns a row. processPendingOCR has no
+per-file exception handler; an exception can terminate that run. Thread races,
+database contention, shutdown and restart behaviour were not tested. No retry
+or explicit failed-item status is demonstrated by this implementation.
+
+SOURCE SNAPSHOT (SHA-256)
+image_processing.py
+  8fb1f60ece0ed9b8e7698c1a1171eccbb16ea07adbd4341d62f01beb53fa1a57
+ocr.py
+  2c4a5ef9d68866e46103907e82d1ad02bfc6c40c5be6b2631875938db0b67d58
+database.py
+  9ea5493325c48f488eab3e04809670f4c3c7ea4032bc11396d6e85e88f77f482
+requirements.txt
+  78964b4a57c1483e3d21cb3e8a0a2f8e0272b53ad664664611c4edb3fda9978b
+search.py
+  abf079695497348a44e1693bc26fb13844f8e7e0b68d01eb66cc384b29a865d1
