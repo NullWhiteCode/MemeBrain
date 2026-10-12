@@ -1,11 +1,12 @@
 """MemeBrain Flask application and HTTP routes."""
 
 from pathlib import Path
+from caption import isCaptionWorkerRunning, startCaptionWorker
 from search import search
-from flask import Flask, render_template, request, send_from_directory
+from flask import Flask, jsonify, render_template, request, send_from_directory, redirect, url_for
 
 from index import index_folder
-from database import setupDatabase
+from database import getCaptionProgress, setupDatabase
 from ocr import startOCRWorker
 
 from config import (
@@ -362,8 +363,41 @@ def serve_thumbnail(filename):
     return "Thumbnail not found.", 404
 
 
-setupDatabase()
+@app.route("/generate_captions", methods=["POST"])
+def generate_captions():
+    """Starts caption generation on user input"""
+    library_path = load_library_path()
+    
+    if library_path:
+        startCaptionWorker()
+        
+    return redirect(url_for('home'))
 
+
+@app.route("/caption_progress", methods=["GET"])
+def caption_progress():
+    result = getCaptionProgress()
+    completed = result[1]
+    total = result[0]
+    
+    pending = total - completed
+    percentage = (completed / total) * 100 if total else 0
+    
+    running = isCaptionWorkerRunning()
+    
+    caption_values = {
+        'total': total, 
+        'completed': completed,
+        'pending': pending,
+        'percentage': percentage,
+        'running': running
+    }
+    
+    return jsonify(caption_values)
+
+
+
+setupDatabase()
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -324,6 +324,49 @@ def searchOCR(search_pattern):
     return structured_results
 
 
+def searchCaptions(search_pattern):
+    search_pattern = "%" + search_pattern + "%"
+    results_structured = []
+    con = setupConnection()
+    cur = con.cursor()
+    
+    cur.execute("""
+    SELECT file_id
+    FROM captions
+    WHERE captions.caption LIKE ?  
+        """,
+        (
+            search_pattern,
+        )
+    )
+    
+    results = cur.fetchall()
+    con.close()
+                
+    for row in results:
+        results_structured.append(row[0])
+        
+    return results_structured
+
+
+def getCaptionProgress():
+    con = setupConnection()
+    cur = con.cursor()
+    
+    cur.execute("""
+    SELECT COUNT(*), COUNT(captions.file_id)
+    FROM files
+    LEFT JOIN captions 
+        ON files.id = captions.file_id
+    WHERE files.status = 'indexed'
+    """)
+    
+    result = cur.fetchone()
+    con.close()
+    
+    return result
+
+
 def getPendingOCR():
     con = setupConnection()
     cur = con.cursor()
@@ -334,6 +377,28 @@ def getPendingOCR():
     LEFT JOIN ocr
         ON files.id = ocr.file_id
     WHERE ocr.file_id IS NULL AND files.status = ?
+        """,
+        (
+            "indexed",
+        ) 
+    )
+    
+    results = cur.fetchall()
+    con.close()
+    
+    return results
+
+
+def getPendingCaptions():
+    con = setupConnection()
+    cur = con.cursor()
+    
+    cur.execute("""
+    SELECT files.id, files.path
+    FROM files
+    LEFT JOIN captions
+        ON files.id = captions.file_id
+    WHERE captions.file_id IS NULL AND files.status = ?
         """,
         (
             "indexed",
@@ -369,3 +434,5 @@ def getStoredPath(file_id):
     
     else:
         return None
+
+    

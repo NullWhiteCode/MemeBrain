@@ -1,0 +1,95 @@
+LIVE CAPTION GENERATION PROGRESS TRACKER
+
+Recorded: 12 October 2026 (Europe/London)
+Baseline: ea37981, 8 October 2026, local image captioning with SQLite persistence.
+
+EVIDENCE STANDARD
+This record describes inspected working-tree source, not a claim that all of it
+is committed or released. Previously recorded synthetic/automated checks are
+preserved below; they were not rerun for this documentation update.
+Manual integration results are user-reported. Work did not independently witness
+or reproduce those tests. No private collection files, database rows, transcripts
+or search terms are reproduced. No application code, commits or pushes were made.
+Source hashes identify the implementation inspected for this update.
+
+PURPOSE AND IMPLEMENTATION
+database.py:getCaptionProgress uses a LEFT JOIN from files to captions and
+returns COUNT(*) and COUNT(captions.file_id), filtered to files.status='indexed'.
+The unique captions.file_id prevents multiple caption rows inflating the count.
+The aggregate measures caption-row existence, not caption quality or generation
+tokens. It covers all indexed database files without a current-folder predicate.
+
+app.py:caption_progress exposes GET /caption_progress. It returns JSON fields
+total, completed, pending, percentage and running. Pending is total minus
+completed; percentage is completed / total * 100, or zero for an empty total.
+running comes from caption.py:isCaptionWorkerRunning and the local thread state.
+The aggregate and thread state are read separately, not as one atomic snapshot.
+
+templates/index.html contains .captions-panel with #caption, #progress (max=100),
+#info and a POST /generate_captions form containing .generate-caption-button.
+static/JS/captions.js fetches immediately and registers a 2,000ms interval. It
+updates progress.value, completed/total/pending text and a two-decimal percentage.
+Button branches are ordered:
+  running: 'Generating...', disabled (source uses a typographic ellipsis).
+  otherwise pending > 0: 'Generate', enabled.
+  otherwise: 'All captions generated', disabled.
+The second condition need not repeat !running because the first branch already
+handles running. The POST starts the worker if a library is configured, then
+redirects home. Current worker default is five pending files per run.
+
+Current static/CSS/style.css includes caption-specific panel, progress and
+button rules. The panel background is blue (#5ea9eb), with a border rule;
+progress is 100% wide and 2.5rem high, and the button is 25% wide and 2.5rem high.
+These dimensions and colour are source-inspected, not a visual rendering test.
+
+PREVIOUSLY RECORDED HISTORY AND ATTRIBUTION
+Baseline ea37981 committed local captioning/persistence. At inspection app.py,
+database.py, caption.py and templates/index.html had local edits, and captions.js
+was untracked. The tracker is documented as current working-tree behaviour;
+no dedicated committed tracker ticket or ticket identifier was established.
+
+PREVIOUSLY RECORDED SYNTHETIC/AUTOMATED VERIFICATION: PASS
+Actual database functions in disposable SQLite returned (0,0) for empty storage
+and (2,1) for two indexed files, one caption and one excluded missing file.
+The actual caption_progress function was extracted using AST and registered in
+an isolated Flask app. Its test client returned HTTP 200 and expected five-field
+JSON for partial/running and empty/idle cases. The empty case returned 0 percent.
+Thread state was stubbed; the production app module was not imported.
+Actual captions.js ran in a Node VM with DOM, fetch and timer doubles. Checks
+passed for 2000ms interval registration, percentage formatting, progress value,
+running, pending, complete and empty-library button branches. A simulated HTTP
+500 was caught and retained the prior display. No real browser timer was run.
+
+USER-REPORTED MANUAL INTEGRATION VERIFICATION
+The user confirmed initial Flask JSON counts of 473 total and 24 completed.
+Browser DevTools showed repeated HTTP 200 progress requests approximately every
+two seconds. During batch processing, completed rose from 24 to 29 and later
+to 39; the user observed the button return to idle. These are user-reported
+live integration observations, not independently witnessed tests by Work.
+Zero-total and all-complete states have not been verified end to end; coverage
+of those states is limited to the synthetic/automated checks above.
+
+LIMITATIONS AND UNVERIFIED CASES
+Work did not independently run the live browser-to-Flask-to-worker workflow.
+An empty library displays 'All captions generated' at 0 percent under current
+logic. A stopped five-item batch with pending files returns to enabled Generate.
+No ETA, explicit error display or automatic queue-draining is implemented here.
+Polling can overlap if requests exceed two seconds; out-of-order responses,
+network recovery, multi-process deployment and click races were not exercised.
+DOM queries precede the try block and assume the panel exists. Rendering,
+accessibility, responsive layout and browser-specific progress styling remain
+unverified beyond the user-reported observations above.
+
+SOURCE SNAPSHOT (SHA-256)
+database.py
+  9ea5493325c48f488eab3e04809670f4c3c7ea4032bc11396d6e85e88f77f482
+app.py
+  7a2d7e6c9f86175da19cd4533845c65a837348695c7ced3d20c8f0a30c730be4
+caption.py
+  55f87b4a7c26421fb5bb899ab1070dc39368f86736061a827cb2823733978172
+static/JS/captions.js
+  830e1736c1fe6975beeff9a634aa4fa06902fb626c520c569ca189ab27a3121b
+templates/index.html
+  13be22b0f54bdb2517ebfc5d6cd3e29fe399ae5eb8690cea71b0ace7604b37b8
+static/CSS/style.css
+  3c98fc260c0640452755dbc5a1f3efaa425d75f191fa27d5835526993a39a6ec

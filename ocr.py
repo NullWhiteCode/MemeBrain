@@ -1,10 +1,13 @@
 from importlib.metadata import version
+from pathlib import Path
 import threading
 import time
 
+import numpy as np
 from rapidocr import RapidOCR
 
 from database import fileLookup, getPendingOCR, insertOCRData
+from image_processing import extractGifFrame
 
 _ocr_thread = None
 
@@ -16,7 +19,13 @@ def createEngine():
 
 
 def extractText(engine, image_path):
-    result = engine(image_path)
+    if Path(image_path).suffix.lower() == ".gif":
+        pil_image = extractGifFrame(image_path)
+        ocr_input = np.array(pil_image)
+    else:
+        ocr_input = image_path
+        
+    result = engine(ocr_input)
     
     if result.txts is not None:
         extracted_text = " ".join(result.txts)
@@ -69,6 +78,3 @@ def startOCRWorker():
 
     _ocr_thread.start()
     return _ocr_thread
-
-
-
