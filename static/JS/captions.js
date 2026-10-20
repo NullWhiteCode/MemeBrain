@@ -27,13 +27,21 @@ async function checkCaptionProgress() {
             button.textContent = "Generating…";
             button.disabled = true;
         }
-        else if (result.pending > 0) {
-            button.textContent = "Generate";
+        else if (result.status === "failed") {
+            button.textContent = "Error while generating";
+            button.disabled = false;
+        }
+        else if (result.pending === 0) {
+            button.textContent = "All captions generated";
+            button.disabled = true;
+        }
+        else if (result.status === "completed") {
+            button.textContent = "Generate more captions";
             button.disabled = false;
         }
         else {
-            button.textContent = "All captions generated";
-            button.disabled = true;
+            button.textContent = "Generate";
+            button.disabled = false;
         }
 
     } catch (error) {

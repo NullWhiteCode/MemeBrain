@@ -261,7 +261,7 @@ body {
 /* Captions panel */
 
 .captions-panel {
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 0.5rem;
   border-radius: 1rem;
   border: 1px solid #304050;
 }
@@ -271,11 +271,28 @@ body {
 }
 
 .captions-panel progress {
-    width: 100%;
+    width: 50%;
     height: 2.5rem;
 }
 
 .captions-panel .generate-caption-button {
-    width: 25%;
-    height: 2.5rem;
+    width: 20%;
+    height: 2.0rem;
+}
+
+/* Models panel */
+
+.models-panel {
+  padding: 0.5rem 0.5rem;
+  border-radius: 1rem;
+  border: 1px solid #304050;
+}
+
+.panel > .models-panel {
+    background: #5ea9eb;
+}
+
+.models-panel .caption-model-button {
+    width: 20%;
+    height: 2.0rem;
 }

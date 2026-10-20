@@ -3,6 +3,8 @@
 import json
 from pathlib import Path
 
+from model_selection import current_caption_model, update_caption_model
+
 
 CONFIG_FILE = Path("config.json")
 
@@ -47,3 +49,32 @@ def save_current_folder(folder_path):
 def load_current_folder():
     """Return the saved current folder, or None if none is configured."""
     return load_config().get("current_folder")
+
+
+def load_caption_model():
+    """Read the saved preference from config.json."""
+    config_caption = load_config().get("caption_model")
+    
+    if config_caption:
+        update_caption_model(config_caption)
+
+    
+def save_caption_model():
+    """Write the current selection to config.json."""
+    config = load_config()
+    model = current_caption_model()
+    
+    if model:
+        config["caption_model"] = str(model)
+        save_config(config)
+        
+        
+def clear_saved_caption_model():
+    """Clears the saved caption model from config.json."""
+    config = load_config()
+    config["caption_model"] = ""
+    save_config(config)
+    
+    
+
+    

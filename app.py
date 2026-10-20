@@ -1,7 +1,8 @@
 """MemeBrain Flask application and HTTP routes."""
 
 from pathlib import Path
-from caption import isCaptionWorkerRunning, startCaptionWorker
+from caption import captionWorkerStatus, isCaptionWorkerRunning, startCaptionWorker
+from model_selection import current_caption_model, update_caption_model
 from search import search
 from flask import Flask, jsonify, render_template, request, send_from_directory, redirect, url_for
 
@@ -10,8 +11,12 @@ from database import getCaptionProgress, setupDatabase
 from ocr import startOCRWorker
 
 from config import (
+    clear_saved_caption_model,
+    load_caption_model,
+    load_config,
     load_current_folder,
     load_library_path,
+    save_caption_model,
     save_current_folder,
     save_library_path,
 )
@@ -384,20 +389,71 @@ def caption_progress():
     percentage = (completed / total) * 100 if total else 0
     
     running = isCaptionWorkerRunning()
+    status = captionWorkerStatus()
     
     caption_values = {
         'total': total, 
         'completed': completed,
         'pending': pending,
         'percentage': percentage,
-        'running': running
+        'running': running,
+        'status': status
     }
     
     return jsonify(caption_values)
 
 
+@app.route("/select_caption_model", methods=["POST"])
+def select_caption_model():
+    caption_folder_path = select_folder("Select a caption model")
+    update_caption_model(caption_folder_path)
+    active_model = current_caption_model()
+    
+    return jsonify({"model_path": str(active_model)})
 
+
+@app.route("/get_model_status", methods=["GET"])
+def get_model_status():
+    active_model_path = str(current_caption_model())
+    remembered_status = False
+    config = load_config()
+    active_selection = bool(active_model_path)
+    
+    if active_model_path == config.get("caption_model") and active_selection:
+        remembered_status = True
+        
+    return jsonify({"active_model_path": active_model_path, 
+                   "remembered_status": remembered_status, 
+                   "active_selection": active_selection}
+                )
+    
+
+@app.route("/update_model_checkbox", methods=["POST"])
+def update_model_checkbox():
+    is_checked = request.json.get('remembered_status')
+    is_active = bool(current_caption_model())
+    
+    if isinstance(is_checked, bool):
+        
+        if is_checked and is_active:
+            save_caption_model()
+            return jsonify("Caption model saved.")
+    
+        if is_checked and not is_active:
+            return jsonify("No model selected to save."), 400
+        
+        else:
+            clear_saved_caption_model()
+            return jsonify("Caption model cleared.")
+        
+    else:
+        return jsonify("Error."), 400
+
+
+
+load_caption_model()
 setupDatabase()
+
 
 if __name__ == "__main__":
     app.run(debug=True)

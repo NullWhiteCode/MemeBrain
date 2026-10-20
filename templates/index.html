@@ -71,15 +71,42 @@
         </section>
 
         <section class="captions-panel">
-          <h2 id="caption"></h2><br />
-          <progress id="progress" max="100" value="0"></progress><br />
+          <h2 id="caption"></h2>
           <p id="info"></p>
+          <progress id="progress" max="100" value="0"></progress><br />
 
           <form method="POST" action="{{ url_for('generate_captions') }}">
             <button class="generate-caption-button" type="submit">
               Generate
             </button>
           </form>
+        </section>
+
+        <section class="models-panel">
+          <h2>Models</h2>
+          <div class="caption-model">
+            <h3>Caption Model</h3>
+            <p id="model-name"></p>
+            <button
+              class="caption-model-button"
+              id="caption-button"
+              type="button"
+            >
+              Select caption model
+            </button>
+
+            <div>
+              <input type="checkbox" id="remember-model" name="save-caption" />
+              <label for="remember-model">Remember model</label>
+            </div>
+            <p>
+              * Model selection will reset when MemeBrain closes unless
+              remembered
+            </p>
+          </div>
+          <div class="ocr-model">
+            <h3>OCR Model</h3>
+          </div>
         </section>
 
         <section class="directories-panel">
@@ -231,5 +258,6 @@
     <script src="{{ url_for('static', filename='JS/thumbnails.js') }}"></script>
     <script src="{{ url_for('static', filename='JS/omnisearch.js') }}"></script>
     <script src="{{ url_for('static', filename='JS/captions.js') }}"></script>
+    <script src="{{ url_for('static', filename='JS/models.js') }}"></script>
   </body>
 </html>

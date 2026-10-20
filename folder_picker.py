@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import filedialog
 
 
-def select_folder():
+def select_folder(title=None):
     """Open a folder picker and return the selected path.
 
     Returns an empty string when the user cancels the dialog.
@@ -12,11 +12,16 @@ def select_folder():
     root = tk.Tk()
     root.withdraw()
     root.attributes("-topmost", True)
+    
+    if title is None:
+        title = "Select an image library"
 
     try:
         return filedialog.askdirectory(
-            title="Select an image library",
+            title=title,
             parent=root,
         )
     finally:
         root.destroy()
+
+

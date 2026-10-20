@@ -6,20 +6,27 @@ from database import fileLookup, getPendingCaptions, insertCaptionData
 import traceback
 
 from image_processing import extractGifFrame
+from model_selection import current_caption_model
 
-MODEL_PATH = r""
 
 _caption_thread = None
+_caption_status = "idle"
 
 
 def loadCaptionModel():
+    
+    model_path = current_caption_model()
+    
+    if not model_path:
+        raise ValueError("No caption model selected.")
+    
     model = Qwen3VLForConditionalGeneration.from_pretrained(
-        MODEL_PATH,
+        model_path,
         dtype="auto",
         device_map="auto",
     )
 
-    processor = AutoProcessor.from_pretrained(MODEL_PATH)
+    processor = AutoProcessor.from_pretrained(model_path)
     
     return model, processor
 
@@ -96,13 +103,25 @@ def prepare_caption_data(image_path, caption_text):
   
     
 def processPendingCaptions(batch_size = 5):
-    pending = getPendingCaptions()
-    if not pending:
-        return
-    
-    model, processor = loadCaptionModel()
+    global _caption_status
 
     try:
+        _caption_status = "running"
+        pending = getPendingCaptions()
+        
+        if not pending:
+            _caption_status = "completed"
+            return
+        
+        model, processor = loadCaptionModel()
+        
+    except Exception:
+        _caption_status = "failed"
+        traceback.print_exc()
+        return
+        
+    try:
+        image_failed = False
         for file in pending[:batch_size]:
             try:
                 extracted_caption = generateCaption(file[1], model, processor)
@@ -110,14 +129,31 @@ def processPendingCaptions(batch_size = 5):
                 insertCaptionData(caption_text)
         
             except Exception as error:
+                _caption_status = "failed"
                 print(f"Caption failed for {file[1]}: {error}")
+                image_failed = True
                 traceback.print_exc()
+                
+        if image_failed is True:
+            _caption_status = "failed"
+            
+        else:
+            _caption_status = "completed"
+            
+    except Exception:
+        traceback.print_exc()
+        _caption_status = "failed"
     
     finally:
-        del model
-        del processor
-        torch.cuda.empty_cache()
+        try:
+            del model
+            del processor
+            torch.cuda.empty_cache()
                 
+        except Exception:
+            traceback.print_exc()
+            _caption_status = "failed"
+            
             
 def startCaptionWorker():
     global _caption_thread
@@ -134,3 +170,6 @@ def startCaptionWorker():
     _caption_thread.start()
     return _caption_thread
 
+
+def captionWorkerStatus():
+    return _caption_status
