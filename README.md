@@ -8,7 +8,7 @@ Browse, search and organise your local image collection without uploading your f
 
 **Generate searchable descriptions of your images using local AI.**
 
-*Planned: automatically generate descriptive filenames based on image contents.*
+Coming soon: AI-assisted file renaming using locally generated image descriptions.
 
 Designed for people whose folders look like this:
 
