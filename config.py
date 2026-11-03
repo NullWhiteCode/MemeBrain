@@ -76,5 +76,18 @@ def clear_saved_caption_model():
     save_config(config)
     
     
-
+def automatic_ocr_enabled():
+    config = load_config()
+    auto_ocr = config.get("automatic_ocr", True)
     
+    return auto_ocr
+    
+    
+def save_ocr_preference(user_preference):
+    if isinstance(user_preference, bool):
+        config = load_config()
+        config["automatic_ocr"] = user_preference
+        save_config(config)
+        
+    else:
+        raise TypeError("OCR preference must be a boolean.")

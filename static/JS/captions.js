@@ -20,7 +20,7 @@ async function checkCaptionProgress() {
         const result = await response.json();
         
         progress.value = result.percentage;
-        info.textContent = result.completed + " of " + result.total + " images captioned . " + result.pending + " remaining";
+        info.textContent = result.completed + " of " + result.total + " images captioned. " + result.pending + " remaining";
         captionText.textContent = "Caption generation" + spaces + result.percentage.toFixed(2) + "%"
         
         if (result.running) {

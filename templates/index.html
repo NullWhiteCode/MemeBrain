@@ -58,7 +58,7 @@
               id="search_pattern"
               name="search_pattern"
               value="{{ search_pattern or '' }}"
-              placeholder="Search filenames and image text..."
+              placeholder="Search filenames, image descriptions and image text..."
             />
 
             <button class="search-button" type="submit">Search</button>
@@ -80,10 +80,6 @@
               Generate
             </button>
           </form>
-        </section>
-
-        <section class="models-panel">
-          <h2>Models</h2>
           <div class="caption-model">
             <h3>Caption Model</h3>
             <p id="model-name"></p>
@@ -104,9 +100,18 @@
               remembered
             </p>
           </div>
-          <div class="ocr-model">
-            <h3>OCR Model</h3>
-          </div>
+        </section>
+
+        <section class="ocr-panel">
+          <h2>OCR</h2>
+          <p id="ocr-info"></p>
+          <progress id="ocr-progress" max="100" value="0"></progress><br />
+
+          <p id="work-status"></p>
+
+          <button class="ocr-button" id="ocr-button" type="button">
+            Generate
+          </button>
         </section>
 
         <section class="directories-panel">
@@ -259,5 +264,6 @@
     <script src="{{ url_for('static', filename='JS/omnisearch.js') }}"></script>
     <script src="{{ url_for('static', filename='JS/captions.js') }}"></script>
     <script src="{{ url_for('static', filename='JS/models.js') }}"></script>
+    <script src="{{ url_for('static', filename='JS/ocr.js') }}"></script>
   </body>
 </html>

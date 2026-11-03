@@ -8,7 +8,7 @@ from flask import Flask, jsonify, render_template, request, send_from_directory,
 
 from index import index_folder
 from database import getCaptionProgress, setupDatabase
-from ocr import startOCRWorker
+from ocr import getOCRStatus, startAutomaticOCR, startManualOCR, stopOCRWorker
 
 from config import (
     clear_saved_caption_model,
@@ -57,7 +57,7 @@ def home():
 
     if library_path:
         start_thumbnail_worker(library_index, library_path)
-        startOCRWorker()
+        startAutomaticOCR()
 
     library_name = None
     current_folder = load_current_folder() or ""
@@ -189,7 +189,7 @@ def folder_browser():
         root_folder,
     )
     
-    startOCRWorker()
+    startAutomaticOCR()
 
     folder_items = get_indexed_folder_items(
         library_index,
@@ -401,6 +401,27 @@ def caption_progress():
     }
     
     return jsonify(caption_values)
+
+
+@app.route("/ocr_progress", methods=["GET"])
+def ocr_progress():
+    result = getOCRStatus()
+    return jsonify(result)
+
+
+@app.route("/ocr_start", methods=["POST"])
+def ocr_start():
+    result = startManualOCR()
+    if result is None:
+        return jsonify({"error": "OCR worker is stopping"}), 409
+    
+    return jsonify({"success": "OCR worker is running"})
+
+
+@app.route("/ocr_stop", methods=["POST"])
+def ocr_stop():
+    stopOCRWorker()
+    return jsonify({"success": "OCR stop requested"})
 
 
 @app.route("/select_caption_model", methods=["POST"])

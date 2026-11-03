@@ -9,7 +9,7 @@ captionCheckbox.addEventListener("change", updateModelCheckbox)
 
 async function displayActiveModel() {
     const url = "/get_model_status";
-    const model = document.querySelector(".models-panel");
+    const model = document.querySelector(".captions-panel");
     const model_name = model.querySelector("#model-name");
 
     try {
