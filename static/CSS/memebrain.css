@@ -1,0 +1,602 @@
+body {
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  color: #222;
+  text-shadow: none;
+}
+
+h1, h2, h3, p, a, label {
+  color: inherit;
+  text-shadow: none;
+}
+
+h1 {
+  font-size: 2rem;
+}
+
+h2 {
+  font-size: 1.25rem;
+}
+
+h3 {
+  font-size: 1rem;
+}
+
+.panel:first-of-type {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-areas:
+    "current current search search search directories"
+    ". captions captions ocr ocr .";
+}
+
+.current-panel {
+  grid-area: current;
+}
+
+.search-panel {
+  grid-area: search;
+}
+
+.directories-panel {
+  grid-area: directories;
+}
+
+.captions-panel {
+  grid-area: captions;
+}
+
+.ocr-panel {
+  grid-area: ocr;
+}
+
+/* Shared PSone panel styling */
+
+.panel > .psone-panel {
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+}
+
+.panel > .psone-panel.container {
+    margin: 0;
+}
+
+.panel > .psone-panel.container::before {
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+.panel:first-of-type {
+    align-items: stretch;
+}
+
+.processing-panel {
+    min-width: 0;
+}
+
+/* Shared processing controls */
+
+.processing-panel progress {
+    width: 100%;
+    max-width: 220px;
+    height: 1rem;
+}
+
+.processing-panel .generate-caption-button,
+.processing-panel .ocr-button {
+    width: 120px;
+    height: 2rem;
+    flex: 0 0 auto;
+}
+
+.search-panel .search-bar {
+    width: 100%;
+    max-width: none;
+    gap: 0.5rem;
+}
+
+.search-panel .search-bar input[type="text"] {
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+}
+
+/* ========================================
+   MemeBrain Skin #1 — PSone Noir
+   ======================================== */
+
+:root {
+    --mb-bg: #08090d;
+    --mb-panel-dark: #080b14;
+    --mb-panel-mid: #151b29;
+    --mb-panel-light: #343b4b;
+    --mb-border: #c3c8d2;
+    --mb-text: #f0f1f5;
+    --mb-muted: #aeb5c2;
+}
+
+/* Page */
+
+body {
+    background: var(--mb-bg);
+    color: var(--mb-text);
+}
+
+/* PSone panels */
+
+.panel > .psone-panel.container {
+    background: linear-gradient(
+        180deg,
+        var(--mb-panel-light) 0%,
+        var(--mb-panel-mid) 18%,
+        var(--mb-panel-dark) 100%
+    );
+
+    border: 1px solid var(--mb-border);
+    border-radius: 8px;
+    box-shadow: inset 0 2px 8px rgba(255, 255, 255, 0.08);
+}
+
+/* Decorative inner border */
+
+.panel > .psone-panel.container::before {
+    border-color: rgba(255, 255, 255, 0.85);
+}
+
+/* Text */
+
+.psone-panel {
+    color: var(--mb-text);
+}
+
+.psone-panel p,
+.psone-panel label,
+.psone-panel .folder-path {
+    color: var(--mb-muted);
+}
+
+/* Headings */
+
+.memebrain-container > h1,
+.psone-panel h2,
+.psone-panel h3 {
+    font-family: "Final Fantasy VII", sans-serif;
+    color: #fff;
+    text-shadow: 2px 2px 0 #000;
+}
+
+/* Links */
+
+.psone-panel a {
+    color: #dce5ff;
+}
+
+.psone-panel a:hover {
+    color: #fff;
+}
+
+/* =========================================
+   PSone Noir — Typography
+   ========================================= */
+
+/* Keep the pixel font for headings only */
+.memebrain-container h1,
+.panel h2,
+.panel h3,
+.images-heading {
+  font-family: "Press Start 2P", monospace;
+  font-weight: normal;
+  line-height: 1.6;
+  letter-spacing: 0;
+  text-shadow: 2px 2px #000;
+}
+
+.memebrain-container h1 {
+  font-size: 1.4rem;
+}
+
+.panel h2,
+.images-heading {
+  font-size: 0.85rem;
+}
+
+.panel h3 {
+  font-size: 0.7rem;
+}
+
+/* =========================================
+   PSone Noir — Buttons
+   ========================================= */
+
+.panel button,
+.panel input[type="submit"],
+.panel input[type="button"] {
+  min-height: 34px;
+  padding: 0.5rem 1rem;
+
+  background: linear-gradient(
+    90deg,
+    #17243d 0%,
+    #33466b 45%,
+    #17243d 100%
+  );
+
+  border: 1px solid #8c9ab5;
+  border-radius: 3px;
+
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+
+  text-shadow: 1px 1px #000;
+  transition: filter 0.15s ease, box-shadow 0.15s ease;
+}
+
+.panel button:hover:not(:disabled),
+.panel input[type="submit"]:hover:not(:disabled),
+.panel input[type="button"]:hover:not(:disabled) {
+  filter: brightness(1.4);
+  box-shadow: 0 0 10px rgba(135, 175, 255, 0.35);
+}
+
+.panel button:active:not(:disabled) {
+  filter: brightness(0.85);
+}
+
+.panel button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* =========================================
+   PSone Noir — Progress Bars
+   ========================================= */
+
+.panel progress {
+  appearance: none;
+  -webkit-appearance: none;
+
+  width: 100%;
+  height: 16px;
+
+  overflow: hidden;
+  background: #050711;
+  border: 2px solid #64718a;
+  border-radius: 0;
+}
+
+/* Chrome / Edge */
+.panel progress::-webkit-progress-bar {
+  background: #050711;
+}
+
+.panel progress::-webkit-progress-value {
+  background: linear-gradient(
+    90deg,
+    #174d83,
+    #238aff,
+    #67c3ff
+  );
+}
+
+/* Firefox */
+.panel progress::-moz-progress-bar {
+  background: #238aff;
+}
+
+/* =========================================
+   PSone Noir — Inputs
+   ========================================= */
+
+.panel input[type="text"],
+.panel input[type="search"] {
+  background: #080b15;
+  color: #fff;
+  border: 1px solid #7d8ca5;
+  border-radius: 2px;
+  padding: 0.5rem;
+}
+
+.panel input::placeholder {
+  color: #9caac0;
+  opacity: 1;
+}
+
+.panel input:focus-visible,
+.panel button:focus-visible {
+  outline: 2px solid #8dc8ff;
+  outline-offset: 3px;
+}
+
+
+/* =========================================
+   PSone Noir — Gallery Cards
+   ========================================= */
+
+.image-grid {
+    gap: 1.5rem;
+    align-items: start;
+}
+
+/* Card frame */
+
+.image-grid .image-card {
+    min-width: 0;
+    padding: 0.75rem;
+
+    background: linear-gradient(
+        180deg,
+        #303747 0%,
+        #151b29 15%,
+        #080b14 100%
+    );
+
+    border: 1px solid #aeb6c5;
+    border-radius: 6px;
+
+    box-shadow:
+        inset 0 1px 3px rgba(255, 255, 255, 0.12),
+        0 3px 8px rgba(0, 0, 0, 0.35);
+
+    transition:
+        transform 0.15s ease,
+        border-color 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+/* Subtle hover illumination */
+
+.image-grid .image-card:hover {
+    transform: translateY(-3px);
+    border-color: #e2e8f5;
+
+    box-shadow:
+        inset 0 1px 4px rgba(255, 255, 255, 0.18),
+        0 0 12px rgba(130, 160, 220, 0.25);
+}
+
+/* Image display area */
+
+.image-grid .image-card img {
+    display: block;
+    width: 100%;
+    height: 340px;
+    object-fit: contain;
+
+    background: #eaeaea;
+    border-radius: 2px;
+}
+
+/* Filename */
+
+.image-grid .image-card .filename {
+    margin-top: 0.75rem;
+    color: #e5e9f2;
+    font-size: 0.85rem;
+    font-weight: normal;
+    text-shadow: 1px 1px #000;
+}
+
+/* Details link */
+
+.image-grid .image-card .details-button {
+    display: inline-block;
+    margin-top: 0.6rem;
+    padding: 0.4rem 0.8rem;
+
+    color: #e5e9f2;
+    background: linear-gradient(
+        90deg,
+        #17243d,
+        #33466b,
+        #17243d
+    );
+
+    border: 1px solid #8c9ab5;
+    border-radius: 3px;
+    text-decoration: none;
+}
+
+.image-grid .image-card .details-button:hover {
+    filter: brightness(1.4);
+}
+
+/* Thumbnail loading placeholders */
+
+.image-grid .thumbnail-placeholder {
+    background: #111725;
+    color: #aeb5c2;
+    border: 1px solid #465064;
+    border-radius: 2px;
+}
+
+
+/* =========================================
+   PSone Noir — Gallery CRT Background
+   ========================================= */
+
+.image-grid {
+    position: relative;
+    isolation: isolate;
+    padding: 1.5rem;
+
+    background:
+        linear-gradient(
+            180deg,
+            #151b29 0%,
+            #080b14 100%
+        );
+
+    border: 1px solid #444e62;
+    border-radius: 8px;
+}
+
+/* CRT scanlines and subtle RGB phosphor pattern */
+
+.image-grid::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    border-radius: inherit;
+
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            transparent 0px,
+            transparent 3px,
+            rgba(0, 0, 0, 0.22) 4px
+        ),
+        repeating-linear-gradient(
+            to right,
+            rgba(255, 0, 0, 0.025) 0px,
+            rgba(0, 255, 0, 0.015) 1px,
+            rgba(0, 80, 255, 0.025) 2px,
+            transparent 3px
+        );
+}
+
+/* Keep gallery cards above the CRT texture */
+
+.image-grid > .image-card {
+    position: relative;
+    z-index: 1;
+}
+
+.image-grid {
+    background:
+        radial-gradient(
+            ellipse at center,
+            transparent 45%,
+            rgba(0, 0, 0, 0.3) 100%
+        ),
+        linear-gradient(
+            180deg,
+            #151b29 0%,
+            #080b14 100%
+        );
+}
+
+
+/* =========================================
+   PSone Noir — Final Button Polish
+   ========================================= */
+
+/* Smooth transitions across dashboard buttons */
+
+.panel button {
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease,
+        box-shadow 0.15s ease,
+        filter 0.15s ease,
+        transform 0.1s ease;
+}
+
+/* Subtle metallic-blue illumination */
+
+.panel button:hover:not(:disabled) {
+    border-color: #c4d7ff;
+    filter: brightness(1.2);
+
+    box-shadow:
+        inset 0 1px 2px rgba(255, 255, 255, 0.18),
+        0 0 8px rgba(100, 155, 255, 0.25);
+}
+
+/* Physical button press */
+
+.panel button:active:not(:disabled) {
+    transform: translateY(1px);
+    filter: brightness(0.9);
+
+    box-shadow:
+        inset 0 2px 4px rgba(0, 0, 0, 0.45);
+}
+
+/* Keyboard navigation */
+
+.panel button:focus-visible {
+    outline: 2px solid #9dcaff;
+    outline-offset: 3px;
+}
+
+/* Disabled controls */
+
+.panel button:disabled {
+    opacity: 0.45;
+    filter: grayscale(0.35);
+    cursor: not-allowed;
+}
+
+/* Respect reduced-motion preferences */
+
+@media (prefers-reduced-motion: reduce) {
+    .panel button {
+        transition: none;
+    }
+
+    .panel button:active:not(:disabled) {
+        transform: none;
+    }
+}
+
+
+/* =========================================
+   PSone Noir — Processing Panel Spacing
+   ========================================= */
+
+/* Let progress bars use the available width */
+
+.panel .processing-panel progress {
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
+}
+
+/* Give longer button labels room */
+
+.panel .processing-panel .generate-caption-button,
+.panel .processing-panel .ocr-button {
+    width: auto;
+    min-width: 120px;
+    max-width: 100%;
+    height: auto;
+    min-height: 34px;
+    white-space: nowrap;
+}
+
+/* Consistent spacing for processing controls */
+
+.panel .processing-panel {
+    gap: 0.5rem;
+}
+
+/* Keep model selection controls readable */
+
+.panel .caption-model {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+/* Prevent text from being clipped */
+
+.panel .processing-panel p {
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+/* Keep both processing action buttons compact */
+
+.panel .processing-panel .generate-caption-button,
+.panel .processing-panel .ocr-button {
+    width: fit-content;
+    min-width: 120px;
+    max-width: 100%;
+    align-self: flex-start;
+}
