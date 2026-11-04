@@ -8,7 +8,7 @@ Browse, search and organise your local image collection without uploading your f
 
 **Generate searchable descriptions of your images using local AI.**
 
-Coming soon: AI-assisted file renaming using locally generated image descriptions.
+Coming later: AI-assisted file renaming using locally generated image descriptions.
 
 Designed for people whose folders look like this:
 
@@ -93,6 +93,9 @@ Your media stays on your machine. AI processing uses locally installed models ra
 - ✅ Persistent OCR results in SQLite
 - ✅ OCR results integrated into OmniSearch
 - ✅ OCR engine and version metadata stored alongside results
+- ✅ OCR worker progress and lifecycle reporting
+- ✅ Manual OCR start and stop controls
+- ✅ OCR processing status displayed in the interface
 
 ### Interface
 
@@ -103,6 +106,79 @@ Your media stays on your machine. AI processing uses locally installed models ra
 - ✅ Caption generation progress panel
 - ✅ Live worker status and Generate button updates
 - ✅ Flask JSON endpoints for model configuration and processing status
+- ✅ PSone Noir dark interface
+- ✅ Charcoal gradient dashboard panels with metallic borders
+- ✅ Retro-styled headings, buttons and progress indicators
+- ✅ Gallery cards with metallic styling and hover feedback
+- ✅ Subtle CRT scanlines, RGB texture and vignette behind gallery cards
+- ✅ Preserved thumbnail clarity without CRT distortion
+- ✅ Responsive dashboard and gallery layout
+
+## Development Roadmap
+
+MemeBrain is under active development. The roadmap identifies the next development priority and longer-term candidates; it is not a fixed release schedule.
+
+### Ticket #110 — PSone Noir UI Redesign
+
+**Status: Complete**
+
+Introduced MemeBrain's first cohesive visual identity, inspired by late-1990s console interfaces.
+
+Delivered:
+
+- Five-panel dashboard styling
+- Charcoal gradients and metallic borders
+- Pixel-style headings
+- Consistent button interactions
+- Styled progress indicators
+- Metallic gallery cards
+- Subtle CRT gallery background
+- Scanlines, RGB texture and vignette
+- Processing-panel spacing improvements
+- Responsive layout polish
+
+The CRT effect is intentionally restricted to the gallery background. Image content remains unaffected.
+
+### Ticket #111 — Integrated Image Viewer
+
+**Status: Next — Planning**
+
+Replace the fragmented image-viewing experience with a unified interface that brings together the image and its associated information.
+
+Proposed capabilities:
+
+- Full-size image viewing
+- Image metadata
+- Stored AI-generated captions
+- Stored OCR-extracted text
+- Navigation between gallery images
+- Consistent integration with the PSone Noir interface
+
+The viewer should reuse existing indexing, database and processing functionality rather than duplicate it.
+
+Scope, interaction design and implementation details will be established before development begins.
+
+### Future Development Candidates
+
+**Semantic Search**
+
+Use local image and text embeddings to retrieve images by meaning rather than relying entirely on exact keyword matches.
+
+**AI-Assisted File Renaming**
+
+Generate descriptive filenames using existing AI captions, with user review and confirmation before modifying files.
+
+**Visual Similarity and Reverse Image Search**
+
+Identify visually related images, including images that may not be byte-for-byte duplicates.
+
+**Organisation Tools**
+
+Introduce tagging and additional ways to manage and organise media collections.
+
+**Configurable Interface Skins**
+
+Expand beyond PSone Noir with alternative visual themes and appearance preferences.
 
 ## Planned Features
 
@@ -123,14 +199,13 @@ Your media stays on your machine. AI processing uses locally installed models ra
 
 ### Media
 
+- Integrated image viewer (Ticket #111)
 - Expanded GIF support
 - Video support
 - AI-assisted image editing
 
 ### AI and Processing
 
-- OCR worker progress and lifecycle reporting
-- Manual OCR start/stop controls
 - Optional automatic background OCR
 - Persistent OCR processing preferences
 - Optional custom OCR models or alternative OCR engines
@@ -138,12 +213,10 @@ Your media stays on your machine. AI processing uses locally installed models ra
 
 ### Interface and Appearance
 
-- Dark PSX-inspired interface
-- Subtle CRT effects in gallery backgrounds
-- Retro-styled controls, panels and progress indicators
 - Configurable UI skins
 - Appearance preferences
 - Further responsive layout improvements
+- Expanded image-viewer interactions
 
 ### Integrations
 
@@ -177,6 +250,8 @@ RapidOCR extracts visible text from images.
 
 Extracted text is stored in SQLite and can be searched through OmniSearch.
 
+OCR processing runs in a background worker with manual start and stop controls and progress reporting.
+
 RapidOCR currently uses its default model configuration. Custom OCR model selection is planned for a future release.
 
 For animated GIFs, MemeBrain extracts a representative frame for captioning and OCR processing.
@@ -185,9 +260,11 @@ For animated GIFs, MemeBrain extracts a representative frame for captioning and 
 
 **MemeBrain is under active development.**
 
-The current focus is on building a reliable local media indexing, searching and AI-processing foundation before expanding into more advanced organisation and visual search features.
+The application has established its core local library indexing, thumbnail generation, search, OCR and AI-captioning systems.
 
-The application is not yet a finished release. Features, interfaces and internal architecture may change as development continues.
+The PSone Noir interface redesign is complete. The next planned development task is Ticket #111, integrating image viewing and stored image information into a unified experience.
+
+MemeBrain is not yet a finished release. Features, interfaces and internal architecture may change as development continues.
 
 The long-term goal is a flexible, inspectable and extensible local media manager that remains useful without requiring cloud services, subscriptions or external accounts.
 
