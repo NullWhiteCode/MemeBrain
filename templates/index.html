@@ -20,10 +20,6 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='CSS/memebrain.css') }}"
     />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/lightbox3@1/dist/lightbox3.css"
-    />
   </head>
   <body>
     <main class="memebrain-container">
@@ -193,12 +189,28 @@
         <p>No images found in the selected folder.</p>
         {% endif %}
       </section>
+
+      <div class="viewer-backdrop" hidden></div>
+      <div class="image-viewer" hidden>
+        <div class="viewer-header">
+          <button class="close-viewer" type="button">Close</button>
+        </div>
+
+        <div class="viewer-image-area">
+          <img alt="" />
+        </div>
+
+        <div class="viewer-controls">
+          <button class="previous-image" type="button">Previous</button>
+          <button class="next-image" type="button">Next</button>
+        </div>
+      </div>
     </main>
-    <script src="https://cdn.jsdelivr.net/npm/lightbox3@1/dist/lightbox3.min.js"></script>
     <script src="{{ url_for('static', filename='JS/thumbnails.js') }}"></script>
     <script src="{{ url_for('static', filename='JS/omnisearch.js') }}"></script>
     <script src="{{ url_for('static', filename='JS/captions.js') }}"></script>
     <script src="{{ url_for('static', filename='JS/models.js') }}"></script>
     <script src="{{ url_for('static', filename='JS/ocr.js') }}"></script>
+    <script src="{{ url_for('static', filename='JS/viewer.js') }}"></script>
   </body>
 </html>
