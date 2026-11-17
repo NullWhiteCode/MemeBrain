@@ -7,8 +7,11 @@ const imgTag = viewer.querySelector("img");
 const closeButton = viewer.querySelector(".close-viewer");
 const previousButton = viewer.querySelector(".previous-image");
 const nextButton = viewer.querySelector(".next-image");
+const content = viewer.querySelector(".viewer-content")
+const details = viewer.querySelector(".details-area")
 
 let currentIndex = 0;
+let metadataRequestId = 0;
 
 document.addEventListener("keydown", handleKeydown);
 closeButton.addEventListener("click", closeViewer);
@@ -20,7 +23,6 @@ images.forEach((image, index) => {
 });
 previousButton.addEventListener("click", () => navigateImage(-1));
 nextButton.addEventListener("click", () => navigateImage(1));
-
 
 function openViewer(event) {
     event.preventDefault();
@@ -46,6 +48,10 @@ function handleKeydown(event) {
     if (event.key === "ArrowRight") {
         navigateImage(1);
     }
+    if (event.key === "Tab") {
+        event.preventDefault();
+        toggleDetails();
+    }
 }
 
 function updateNavigation() {
@@ -65,4 +71,98 @@ function navigateImage(direction) {
 function displayImage() {
     imgTag.src = images[currentIndex].href;
     updateNavigation();
+    loadImageDetails();
+}
+
+function toggleDetails() {
+    const list = content.classList;
+    const toggle = list.toggle("details-mode");
+    details.hidden = !toggle;   
+}
+
+async function loadImageDetails() {
+    const currentImg = images[currentIndex];
+    const filename = currentImg.dataset.caption;
+    const url = "/image_metadata/" + encodeURIComponent(filename);
+    const requestId = ++metadataRequestId;
+    details.replaceChildren();
+
+    try {
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error(`Response status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (requestId !== metadataRequestId) {
+            return
+        }
+
+        details.replaceChildren();
+
+        const heading = document.createElement("h3");
+        heading.textContent = "IMAGE INFORMATION";
+        heading.classList.add("metadata-heading");
+        details.append(heading);
+
+        createMetadataRow("Filename", data.metadata.filename);
+        createMetadataRow("Dimensions", data.metadata.dimensions);
+        createMetadataRow("File size", data.metadata.filesize);
+        createMetadataRow("Extension", data.metadata.extension);
+        createMetadataRow("Created", data.metadata.created);
+        createMetadataRow("Modified", data.metadata.modified);
+        createMetadataRow("MIME type", data.metadata.mime_type);
+        createMetadataRow("Mode", data.metadata.mode);
+        createMetadataRow("Animated", data.metadata.animated ? "Yes" : "No");
+
+        const duplicateHeading = document.createElement("h3");
+        duplicateHeading.textContent = "DUPLICATES";
+        duplicateHeading.classList.add("metadata-heading");
+        details.append(duplicateHeading);
+
+        if (data.duplicate_preview.length === 0) {
+            const paragraph = document.createElement("p");
+            paragraph.textContent = "No duplicates found";
+            paragraph.classList.add("duplicates-empty");
+            details.appendChild(paragraph);
+        } else {
+            for (const duplicate of data.duplicate_preview) {
+                if (duplicate.thumbnail_exists) {
+                    const duplicateImage = document.createElement("img");
+                    duplicateImage.classList.add("duplicate-thumbnail");
+                    duplicateImage.src = "/thumbnail/" + duplicate.thumbnail;
+                    duplicateImage.alt = duplicate.filename;
+                    details.appendChild(duplicateImage);
+
+                    duplicateImage.addEventListener("click", () => {
+                        const index = Array.from(images).findIndex(image =>
+                            image.dataset.caption === duplicate.relative_path
+                        );
+
+                        if (index !== -1) {
+                            currentIndex = index;
+                            displayImage()
+                        }
+                    });
+                }
+            }
+        }
+    } catch (error) {
+        console.error("🚨", error.message);
+    }
+}
+
+function createMetadataRow(label, value) {
+    const paragraph = document.createElement("p");
+    const newLabel = document.createElement("span");
+    const newValue = document.createElement("span");
+    newLabel.textContent = label;
+    newValue.textContent = value;
+    paragraph.append(newLabel, newValue);
+    details.appendChild(paragraph);
+    paragraph.classList.add("metadata-row");
+    newLabel.classList.add("metadata-label");
+    newValue.classList.add("metadata-value");
 }
