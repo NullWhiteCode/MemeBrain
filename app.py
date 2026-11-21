@@ -7,7 +7,7 @@ from search import search
 from flask import Flask, jsonify, render_template, request, send_from_directory, redirect, url_for
 
 from index import index_folder
-from database import getCaptionProgress, setupDatabase
+from database import fileLookup, getCaptionData, getCaptionProgress, ocrRowLookup, setupDatabase
 from ocr import getOCRStatus, startAutomaticOCR, startManualOCR, stopOCRWorker
 
 from config import (
@@ -315,21 +315,45 @@ def image_metadata(filename: str):
     
     valid_root_folder = root_folder.resolve()
     valid_image_path = image_path.resolve()
-
+    
     if (
         not valid_image_path.is_relative_to(valid_root_folder)
         or not image_path.is_file()
         or image_path.suffix.lower() not in SUPPORTED_EXTENSIONS
     ):
         return "File not found or unsupported file type.", 404
+    
+    file = fileLookup(image_path)
+    if file is None:
+        return "File does not exist in the database.", 404
+    
+    file_id = file[0]
+    captionData = getCaptionData(file_id)
 
+    if captionData is None:
+        caption = None
+    else:
+        caption = captionData[0]
+        
+    ocrRow = ocrRowLookup(image_path)
+    
+    if ocrRow is None:
+        ocr = None
+    else:
+        ocr = ocrRow[2]
+    
     metadata = get_image_metadata(image_path)
     if metadata is None:
         return "Metadata does not exist for this image.", 404
     
     duplicate_preview = build_duplicate_preview(metadata["duplicates"], root_folder)
 
-    return jsonify(metadata=metadata, duplicate_preview=duplicate_preview)
+    return jsonify(
+        metadata=metadata,
+        duplicate_preview=duplicate_preview,
+        caption=caption,
+        ocr_text=ocr
+    )
 
 
 @app.route("/thumbnail/<path:filename>")

@@ -117,6 +117,24 @@ async function loadImageDetails() {
         createMetadataRow("Mode", data.metadata.mode);
         createMetadataRow("Animated", data.metadata.animated ? "Yes" : "No");
 
+        const captionHeading = document.createElement("h3");
+        captionHeading.textContent = "CAPTIONS";
+        captionHeading.classList.add("metadata-heading");
+        details.append(captionHeading);
+        const captionElement = document.createElement("p");
+        captionElement.classList.add("metadata-description");
+        captionElement.textContent = data.caption ?? "No caption generated";
+        details.append(captionElement);
+
+        const ocrHeading = document.createElement("h3");
+        ocrHeading.textContent = "OCR";
+        ocrHeading.classList.add("metadata-heading");
+        details.append(ocrHeading);
+        const ocrElement = document.createElement("p");
+        ocrElement.classList.add("metadata-description");
+        ocrElement.textContent = data.ocr_text ?? "No ocr generated";
+        details.append(ocrElement);
+
         const duplicateHeading = document.createElement("h3");
         duplicateHeading.textContent = "DUPLICATES";
         duplicateHeading.classList.add("metadata-heading");

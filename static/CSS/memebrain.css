@@ -926,3 +926,22 @@ body {
     border-color: rgba(170, 195, 235, 0.6);
     background: rgba(50, 65, 90, 0.35);
 }
+
+/* AI caption and OCR text */
+
+.metadata-description {
+    margin: 0 0 14px;
+    padding: 12px 14px;
+
+    color: #d5dce8;
+    font-size: 13px;
+    line-height: 1.65;
+
+    background: rgba(18, 24, 36, 0.75);
+    border-left: 2px solid #526b91;
+    border-radius: 0 4px 4px 0;
+
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    user-select: text;
+}
